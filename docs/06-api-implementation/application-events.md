@@ -1,0 +1,5 @@
+CheckInSubmitted
+CheckOutSubmitted
+PriorityCompleted
+CRSCalculated
+PlanningCycleGenerated

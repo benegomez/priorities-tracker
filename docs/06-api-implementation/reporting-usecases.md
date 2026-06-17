@@ -1,0 +1,3 @@
+GenerateManagerSummaryUseCase
+GenerateTeamPerformanceUseCase
+GenerateProjectProgressUseCase

@@ -1,0 +1,6 @@
+# Domain Exceptions
+
+DomainException
+ValidationException
+AuthorizationException
+BusinessRuleViolation
