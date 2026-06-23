@@ -116,6 +116,7 @@ prioritiestraccker/
 | Seguridad | `docs/02-arquitectura/security-architecture.md` | JWT, RBAC, audit, evolución |
 | Observabilidad | `docs/02-arquitectura/observability-architecture.md` | Logging, correlation IDs, métricas |
 | Standards de desarrollo | `docs/08-Engineering-Delivery/development-standards.md` | DoD, quality gates, ciclo de vida |
+| Deuda técnica | `docs/technical-debt.md` | Ítems open/closed con prioridad y criterio de cierre |
 
 ---
 

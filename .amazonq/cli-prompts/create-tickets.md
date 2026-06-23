@@ -381,9 +381,48 @@ Requiere que el ticket backend esté definido (para saber qué variables necesit
 
 ---
 
-## Paso 7 — Confirmar
+## Paso 7 — Registrar Deuda Técnica
+
+Antes de confirmar, revisa los tickets creados y detecta tests o criterios que hayan quedado marcados como "pendiente" o "diferido".
+
+Para cada ítem de deuda identificado:
+1. Abre `docs/technical-debt.md`
+2. Agrega un nuevo ítem en la tabla **Deuda Activa** con el siguiente formato:
+
+```markdown
+### TD-XXX — <descripción corta>
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-XXX |
+| **Estado** | `open` |
+| **Prioridad** | P1 / P2 / P3 |
+| **Módulo** | `<módulo>` |
+| **Origen** | US-XXX `feature/<branch>` |
+| **Descripción** | <qué falta y por qué no se implementó ahora> |
+| **Causa raíz** | <razón técnica o de prioridad> |
+| **Criterio de cierre** | <condición concreta y verificable para cerrar este ítem> |
+| **Cuándo cerrar** | <evento o momento recomendado> |
+```
+
+Asignar prioridad según:
+- `P1` — bloquea seguridad o calidad crítica
+- `P2` — afecta cobertura de tests en flujos Critical/High
+- `P3` — mejora de calidad no urgente
+
+Si no hay deuda nueva, indicarlo explícitamente: “No se registró deuda técnica nueva.”
+
+También actualizar la tabla **Historial de Cambios** al final del archivo.
+
+---
+
+## Paso 8 — Confirmar
 
 Responde con la lista de tickets creados y sus rutas. Indicar explícitamente si el ticket infra fue generado o no y por qué.
+
+Indicar también:
+- Deuda técnica registrada en `docs/technical-debt.md` (IDs y descripción breve)
+- O bien: “No se registró deuda técnica nueva.”
 
 > **Regla de branching:** todos los tickets de una misma US comparten un único branch `feature/<story-id>-<feature-name>`. El orden de implementación (DB → BE → FE) se gestiona con commits y el `plan.md`, no con branches separados.
 
