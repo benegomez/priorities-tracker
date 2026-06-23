@@ -1,5 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+
+from src.modules.auth.api.router import limiter, router as auth_router
 
 app = FastAPI(
     title="Priorities Tracker API",
@@ -7,6 +12,10 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,9 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routers se registran aquí a medida que se implementan los módulos
-# from src.modules.auth.api.router import router as auth_router
-# app.include_router(auth_router, prefix="/api/v1")
+# Routers
+app.include_router(auth_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["health"])
@@ -28,5 +36,4 @@ async def health() -> dict[str, str]:
 
 @app.get("/health/ready", tags=["health"])
 async def health_ready() -> dict[str, str]:
-    # TODO: agregar validación de DB al implementar shared/database
     return {"status": "ok"}

@@ -46,13 +46,38 @@ Modelo: **Trunk-Based Development**
 | `release/*` | Estabilización de release | Desde `main`, merge via PR con aprobación |
 | `hotfix/*` | Corrección de producción urgente | Merge directo a `main` con aprobación |
 
-Ejemplos de nombres de branch:
+### Naming de Feature Branches
+
+Un branch por User Story — no por capa:
+
 ```
-feature/checkin-flow
-feature/crs-calculation
+feature/<story-id>-<nombre-descriptivo>
+```
+
+Ejemplos:
+```
+feature/002-user-authentication
+feature/001-weekly-checkin-creation
+feature/003-weekly-checkout
 hotfix/auth-token-expiry
 release/v1.0.0
 ```
+
+### Flujo dentro del branch
+
+El orden DB → BE → FE se gestiona con commits consecutivos en el mismo branch:
+
+```
+git commit -m "feat(db): add schema for <feature>"
+git commit -m "feat(<module>): implement <feature> endpoints"
+git commit -m "feat(<feature>): add UI components and routing"
+git commit -m "test(<module>): add unit and integration tests"
+```
+
+El PR se abre **una única vez** al completar todas las capas. Esto garantiza:
+- Trazabilidad directa US → PR
+- El reviewer ve el cambio completo en contexto
+- Historia del repo limpia y auditable (ADR-002)
 
 ---
 

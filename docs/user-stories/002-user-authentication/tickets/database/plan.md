@@ -11,7 +11,7 @@ progress: 24 / 24 tasks completed
 ## Fase 1 · Prerequisitos
 - [x] PostgreSQL corriendo: `docker compose ps`
 - [x] Última versión del branch principal: `git pull origin main`
-- [x] Crear branch: `git checkout -b feature/user-authentication-database`
+- [x] Crear branch: `git checkout -b feature/002-user-authentication`
 
 ## Fase 2 · Migración Alembic
 _Archivo: `apps/backend/src/shared/database/migrations/202606231109_auth_organizations_users_refresh_tokens.py`_
@@ -67,5 +67,5 @@ _Archivo: `apps/backend/scripts/seed_auth.py`_
 
 ## Fase 6 · Entrega
 - [x] Commit: `git commit -m "feat(db): add organizations, users and refresh_tokens schema for auth"`
-- [x] Push: `git push origin feature/user-authentication-database`
-- [x] Abrir PR — NO hacer merge sin validación
+- [x] Push: `git push origin feature/002-user-authentication`
+- [x] Continuar en el mismo branch con el ticket backend

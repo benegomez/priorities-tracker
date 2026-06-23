@@ -219,7 +219,7 @@ Herramienta: `Playwright`
 - [ ] `test_cross_tenant_access_returns_403`
 
 ## Git Branch
-`feature/<feature-name>-backend`
+`feature/<story-id>-<feature-name>` — branch único compartido con DB y FE de la misma US
 ```
 
 ## Paso 5 — Ticket Frontend
@@ -308,7 +308,7 @@ Herramienta: `Playwright`
 - [ ] Navegación por teclado
 
 ## Git Branch
-`feature/<feature-name>-frontend`
+`feature/<story-id>-<feature-name>` — branch único compartido con DB y BE de la misma US
 ```
 
 ## Paso 6 — Ticket Infra (Opcional)
@@ -376,11 +376,15 @@ Los cambios de producción van en el repo GitLab de deploy.
 Requiere que el ticket backend esté definido (para saber qué variables necesita).
 
 ## Git Branch
-`feature/<feature-name>-infra`
+`feature/<story-id>-<feature-name>` — branch único compartido con todas las capas de la misma US
 ```
 
 ---
 
 ## Paso 7 — Confirmar
 
-Responde con la lista de tickets creados y sus rutas. Indicar explícitamente si el ticket infra fue generado o no y por qué. Siguiente paso sugerido: `/create-plan <story-id>`
+Responde con la lista de tickets creados y sus rutas. Indicar explícitamente si el ticket infra fue generado o no y por qué.
+
+> **Regla de branching:** todos los tickets de una misma US comparten un único branch `feature/<story-id>-<feature-name>`. El orden de implementación (DB → BE → FE) se gestiona con commits y el `plan.md`, no con branches separados.
+
+Siguiente paso sugerido: `/create-plan <story-id>`
