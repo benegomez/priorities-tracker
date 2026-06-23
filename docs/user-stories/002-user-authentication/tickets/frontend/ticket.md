@@ -1,5 +1,5 @@
 ---
-status: todo
+status: done
 type: frontend
 story: docs/user-stories/002-user-authentication/UserStory.md
 depends-on: tickets/backend/ticket.md
@@ -186,4 +186,4 @@ Herramienta: `Playwright`
 - [ ] Focus en el primer campo al cargar la página
 
 ## Git Branch
-`feature/user-authentication-frontend`
+`feature/002-user-authentication` — branch único compartido con DB y BE de la misma US
