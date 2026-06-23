@@ -311,6 +311,76 @@ Herramienta: `Playwright`
 `feature/<feature-name>-frontend`
 ```
 
-## Paso 6 — Confirmar
+## Paso 6 — Ticket Infra (Opcional)
 
-Responde con la lista de tickets creados y sus rutas. Siguiente paso sugerido: `/create-plan <story-id>`
+Generar este ticket **solo si** la sección `[enhanced]` de la US declara una dependencia técnica de infraestructura nueva — es decir, un servicio que no existe en el `docker-compose.yml` actual (ej. Redis, worker, AI Gateway).
+
+Si no hay nueva infraestructura requerida, **omitir este paso**.
+
+Plantilla para `tickets/infra/ticket.md`:
+
+```markdown
+---
+status: todo
+type: infra
+story: <ruta al UserStory.md>
+depends-on: tickets/backend/ticket.md
+---
+
+# [INFRA] <Feature Name> — <Nombre del Nuevo Servicio>
+
+## Objetivo
+<qué servicio se agrega y por qué lo requiere esta US>
+
+## Scope
+Solo cambios en `docker-compose.yml` y `.env.example` del repositorio GitHub.
+Los cambios de producción van en el repo GitLab de deploy.
+
+## Cambios en docker-compose.yml
+
+### Nuevo servicio: `<nombre>`
+```yaml
+  <nombre>:
+    image: <imagen>:<version>
+    container_name: priorities-tracker-<nombre>
+    ports:
+      - "<host>:<interno>"
+    environment:
+      - <VAR>=<valor-dev>
+    healthcheck:
+      test: ["CMD", "<comando-healthcheck>"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - priorities-net
+    restart: unless-stopped
+```
+
+## Nuevas Variables en .env.example
+```bash
+# ── <Nombre del servicio> ──────────────────────────────────
+# <descripción de para qué se usa>
+<VARIABLE_NAME>=<valor-ejemplo>
+```
+
+## Criterios de Aceptación
+- [ ] Servicio agregado al docker-compose.yml con health check
+- [ ] Variables documentadas en .env.example con comentarios
+- [ ] `docker compose up` levanta sin errores
+- [ ] Health check del nuevo servicio pasa
+- [ ] El servicio es accesible desde el contenedor `api`
+- [ ] Compatibilidad Kubernetes verificada (stateless, config externalizada)
+
+## Dependencias
+Requiere que el ticket backend esté definido (para saber qué variables necesita).
+
+## Git Branch
+`feature/<feature-name>-infra`
+```
+
+---
+
+## Paso 7 — Confirmar
+
+Responde con la lista de tickets creados y sus rutas. Indicar explícitamente si el ticket infra fue generado o no y por qué. Siguiente paso sugerido: `/create-plan <story-id>`

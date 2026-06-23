@@ -32,3 +32,8 @@ User Story básica
 /git-flow pr        → PR frontend
       ↓ merge
 /update-docs        → Documentación sincronizada
+
+
+
+
+/create-user-story → /enrich-us → /create-tickets → /create-plan → /develop-plan → /run-tests → /git-flow → /update-docs

@@ -158,6 +158,7 @@ Antes de generar código, el agente debe considerar el rule correspondiente al �
 | `database-standards.md` | Modelos SQLAlchemy, migraciones Alembic, queries |
 | `domain-standards.md` | Entidades, reglas de negocio, state machines, CRS |
 | `frontend-standards.md` | Componentes React, features, hooks, servicios |
+| `infrastructure-standards.md` | Docker Compose dev, Dockerfiles, env vars, health checks |
 | `security-standards.md` | JWT, RBAC, multi-tenant, auditoría |
 | `testing-standards.md` | Estrategia de tests por nivel de riesgo |
 | `cicd-standards.md` | GitHub Actions, GitLab pipelines, branching |
@@ -169,12 +170,16 @@ Antes de generar código, el agente debe considerar el rule correspondiente al �
 Para cualquier nueva funcionalidad, seguir este orden:
 
 ```
-1. Leer FR correspondiente en docs/01-product-definition/requirements-functional.md
-2. Revisar domain-standards.md — ¿qué entidades y BRs aplican?
-3. Revisar api-standards.md — diseñar contrato OpenAPI primero
-4. Implementar en backend respetando Clean Architecture por módulo
-5. Escribir tests según nivel de riesgo (testing-standards.md)
-6. Implementar en frontend consumiendo el contrato
+/setup-project          ← una sola vez al inicio del proyecto
+      ↓
+/create-user-story
+/enrich-us
+/create-tickets         ← genera ticket infra/ solo si la US requiere nuevo servicio
+/create-plan
+/develop-plan
+/run-tests
+/git-flow
+/update-docs
 ```
 
 ---
