@@ -202,9 +202,9 @@ JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
 ## Tests Requeridos
 
 > Nivel de riesgo = Critical | Complejidad = M → cobertura mínima >95%
-> Resultado: **28/28 tests passed** (18 unit + 10 integration)
+> Resultado: **33/33 tests passed** (20 unit + 13 integration) + bandit ✅ + pip-audit ✅
 
-### Unit Tests — `modules/auth/tests/unit/` ✅ 18 passed
+### Unit Tests — `modules/auth/tests/unit/` ✅ 20 passed
 
 **LoginUseCase:**
 - [x] `test_login_valid_credentials_returns_tokens`
@@ -213,6 +213,8 @@ JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
 - [x] `test_login_inactive_user_raises_authorization_exception`
 - [x] `test_login_success_emits_audit_event`
 - [x] `test_login_failure_emits_audit_event`
+- [x] `test_correlation_id_passed_to_audit_on_success`
+- [x] `test_correlation_id_passed_to_audit_on_failure`
 
 **RefreshTokenUseCase:**
 - [x] `test_refresh_valid_token_returns_new_access_token`
@@ -234,7 +236,7 @@ JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
 - [x] `test_verify_correct_password_returns_true`
 - [x] `test_verify_wrong_password_returns_false`
 
-### Integration Tests — `modules/auth/tests/integration/` ✅ 10 passed
+### Integration Tests — `modules/auth/tests/integration/` ✅ 13 passed
 
 - [x] `test_endpoint_login_returns_200_with_valid_credentials`
 - [x] `test_endpoint_login_returns_401_with_wrong_password`
@@ -246,10 +248,25 @@ JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
 - [x] `test_endpoint_me_returns_user_info_with_valid_token`
 - [x] `test_endpoint_me_returns_401_without_token`
 - [x] `test_jwt_secret_not_present_in_response_body`
+- [x] `test_refresh_token_from_org_a_cannot_be_used_in_org_b_context`
+- [x] `test_user_from_org_a_cannot_authenticate_as_user_from_org_b`
+- [x] `test_correlation_id_present_in_audit_log_events`
 
 ### Contract Tests — pendiente para iteración posterior
-### E2E Tests — pendiente para ticket frontend
-### Security Tests — parcialmente cubierto por integration tests
+### E2E Tests — pendiente para ticket frontend (Playwright)
+
+### Security Tests — parcialmente cubierto
+- [x] `test_login_error_message_does_not_reveal_which_field_failed` ✅ (integration test)
+- [x] `test_jwt_secret_not_present_in_response_body` ✅ (integration test)
+- [x] `test_refresh_token_from_org_a_cannot_be_used_in_org_b_context` ✅ (integration test)
+- [x] `test_user_from_org_a_cannot_authenticate_as_user_from_org_b` ✅ (integration test)
+- [x] `test_correlation_id_present_in_audit_log_events` ✅ (unit + integration)
+- [x] `bandit` sin findings HIGH/CRITICAL ✅ (0 High, 0 Critical)
+- [x] `pip-audit` sin vulnerabilidades conocidas ✅
+
+### Tests pendientes (deuda técnica menor)
+- [ ] `test_endpoint_login_returns_429_after_5_failed_attempts` (marcado @slow, requiere RATELIMIT_ENABLED=true)
+- [ ] Contract tests con schemathesis (diferido — bajo riesgo)
 
 ## Git Branch
 `feature/002-user-authentication` — branch único compartido con DB y FE de la misma US

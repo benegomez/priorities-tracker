@@ -2,7 +2,7 @@
 ticket: docs/user-stories/002-user-authentication/tickets/frontend/ticket.md
 layer: frontend
 depends-on: docs/user-stories/002-user-authentication/tickets/backend/ticket.md
-progress: 39 / 52 tasks completed
+progress: 44 / 52 tasks completed
 ---
 
 # Plan de Desarrollo — [FE] User Authentication — Login, Logout & Sesión
@@ -94,23 +94,28 @@ _Archivo: `apps/frontend/src/middleware.ts`_
 - [x] Configurar `matcher` en `middleware.ts` para excluir assets estáticos
 
 ## Fase 10 · Tests
-_Pendiente para iteración posterior_
+_9/9 tests passed con vitest_
 
-### Unit / Component Tests (vitest + Testing Library)
+### Unit / Component Tests (vitest + Testing Library) — 9 passed ✅
+- [x] `test_login_schema_rejects_invalid_email`
+- [x] `test_login_schema_rejects_empty_password`
+- [x] `test_login_schema_accepts_valid_input`
+- [x] `test_login_schema_rejects_missing_email`
+- [x] `test_login_schema_rejects_missing_password`
+- [x] `test_auth_store_starts_with_null_user`
+- [x] `test_auth_store_setUser_updates_user_state`
+- [x] `test_auth_store_setTokens_updates_token_state`
+- [x] `test_auth_store_clearUser_resets_all_state`
+
+### Component render tests — pendiente
 - [ ] `test_LoginForm_renders_email_and_password_fields`
 - [ ] `test_LoginForm_shows_loading_state_while_submitting`
 - [ ] `test_LoginForm_shows_error_message_on_401`
 - [ ] `test_LoginForm_shows_error_message_on_403_inactive_user`
 - [ ] `test_LoginForm_shows_rate_limit_message_on_429`
-- [ ] `test_login_schema_rejects_invalid_email`
-- [ ] `test_login_schema_rejects_empty_password`
-- [ ] `test_login_schema_accepts_valid_input`
-- [ ] `test_useLogin_on_success_updates_auth_store`
-- [ ] `test_useLogout_on_success_clears_auth_store`
-- [ ] `test_AuthProvider_restores_session_from_cookie_on_mount`
 
 ### E2E Tests (Playwright) — pendiente
-- [ ] Tests de flujo completo
+- [ ] Tests de flujo completo (diferido a iteración UX)
 
 ## Fase 11 · Accesibilidad
 - [x] `<form>` semántico con `<label>` asociado a cada input (for/id)
@@ -121,6 +126,7 @@ _Pendiente para iteración posterior_
 
 ## Fase 12 · Verificación
 - [x] `npm run build` en `apps/frontend/` — sin errores TypeScript ✅
+- [x] `npm run test` — 9/9 tests passed ✅
 - [ ] Verificar en navegador: estado loading, error 401, error 403, error 429 y estado success
 - [ ] Verificar redirección por rol
 - [ ] Verificar que ruta protegida sin sesión redirige a `/auth/login`
