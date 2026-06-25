@@ -24,6 +24,16 @@ Lee primero:
 
 ---
 
+## Paso 1b — Revisar Deuda Técnica del Módulo
+
+Lee `docs/technical-debt.md` y filtra los ítems con estado `open` cuyo **Módulo** coincida con el bounded context de esta US.
+
+- Si hay deuda `P1` o `P2` relacionada: men ciónala en la sección `### Dependencies` del `[enhanced]` bajo la clave `Deuda técnica activa`.
+- Si la nueva US puede cerrar alguna deuda existente: indicarlo explícitamente al usuario antes de continuar.
+- Si no hay deuda relacionada: continuar sin interrumpir.
+
+---
+
 ## Paso 2 — Analizar y Mapear
 
 Identifica y documenta los siguientes elementos antes de escribir el `[enhanced]`:

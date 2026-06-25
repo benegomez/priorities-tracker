@@ -29,7 +29,18 @@ Lee primero:
 
 ---
 
-## Paso 1 — Revisar Historias Existentes
+## Paso 1 — Revisar Deuda Técnica Activa
+
+Antes de seleccionar la siguiente historia, lee `docs/technical-debt.md`:
+
+- Lista los ítems con estado `open` y prioridad `P1` o `P2`.
+- Si hay deuda `P1` abierta: **detente** e informa al usuario que debe cerrarse antes de crear nueva funcionalidad.
+- Si hay deuda `P2` del módulo que afectaría la siguiente historia: men ciónala al usuario como recomendación antes de continuar.
+- Si solo hay deuda `P3`: continuar sin interrumpir.
+
+---
+
+## Paso 2 — Revisar Historias Existentes
 
 - Escanea `docs/user-stories/` para identificar qué historias ya existen.
 - Lista las historias ya creadas con su estado (`[original]` only vs. `[enhanced]`).
@@ -37,7 +48,7 @@ Lee primero:
 
 ---
 
-## Paso 2 — Evaluar Candidatas por Valor
+## Paso 3 — Evaluar Candidatas por Valor
 
 Para cada capacidad sin historia, evalúa su valor usando estos cuatro criterios:
 
@@ -108,7 +119,7 @@ Ordena las candidatas de mayor a menor score. La de mayor score es la siguiente 
 
 ---
 
-## Paso 3 — Justificar la Selección
+## Paso 4 — Justificar la Selección
 
 Antes de crear la historia, presenta al usuario:
 
@@ -133,7 +144,7 @@ Si el usuario responde con otra opción, crear esa historia en su lugar.
 
 ---
 
-## Paso 4 — Crear la User Story
+## Paso 5 — Crear la User Story
 
 Una vez confirmada la historia, crea el archivo en:
 
@@ -175,7 +186,7 @@ created: <fecha actual>
 
 ---
 
-## Paso 5 — Confirmar
+## Paso 6 — Confirmar
 
 Responde con:
 
@@ -186,6 +197,8 @@ Persona:         <nombre de la persona>
 FR de referencia: FR-XXX
 Bounded Context: <contexto> → Módulo: <módulo>
 Score de valor:  <X.XX>/3
+
+Deuda técnica activa relacionada: <ID TD-XXX si aplica, o “none”>
 
 Siguiente paso:  /enrich-us <story-id>
 ```

@@ -116,6 +116,7 @@ prioritiestraccker/
 | Seguridad | `docs/02-arquitectura/security-architecture.md` | JWT, RBAC, audit, evolución |
 | Observabilidad | `docs/02-arquitectura/observability-architecture.md` | Logging, correlation IDs, métricas |
 | Standards de desarrollo | `docs/08-Engineering-Delivery/development-standards.md` | DoD, quality gates, ciclo de vida |
+| Deuda técnica | `docs/technical-debt.md` | Ítems open/closed con prioridad y criterio de cierre |
 
 ---
 
@@ -158,6 +159,7 @@ Antes de generar código, el agente debe considerar el rule correspondiente al �
 | `database-standards.md` | Modelos SQLAlchemy, migraciones Alembic, queries |
 | `domain-standards.md` | Entidades, reglas de negocio, state machines, CRS |
 | `frontend-standards.md` | Componentes React, features, hooks, servicios |
+| `infrastructure-standards.md` | Docker Compose dev, Dockerfiles, env vars, health checks |
 | `security-standards.md` | JWT, RBAC, multi-tenant, auditoría |
 | `testing-standards.md` | Estrategia de tests por nivel de riesgo |
 | `cicd-standards.md` | GitHub Actions, GitLab pipelines, branching |
@@ -169,12 +171,16 @@ Antes de generar código, el agente debe considerar el rule correspondiente al �
 Para cualquier nueva funcionalidad, seguir este orden:
 
 ```
-1. Leer FR correspondiente en docs/01-product-definition/requirements-functional.md
-2. Revisar domain-standards.md — ¿qué entidades y BRs aplican?
-3. Revisar api-standards.md — diseñar contrato OpenAPI primero
-4. Implementar en backend respetando Clean Architecture por módulo
-5. Escribir tests según nivel de riesgo (testing-standards.md)
-6. Implementar en frontend consumiendo el contrato
+/setup-project          ← una sola vez al inicio del proyecto
+      ↓
+/create-user-story
+/enrich-us
+/create-tickets         ← genera ticket infra/ solo si la US requiere nuevo servicio
+/create-plan
+/develop-plan
+/run-tests
+/git-flow
+/update-docs
 ```
 
 ---

@@ -92,10 +92,11 @@ Después de verificación:
 2. `git commit -m "<type>(<scope>): <descripción en inglés>"`
    - Tipos: `feat`, `fix`, `refactor`, `test`, `docs`
    - Scope: nombre del módulo (ej. `checkin`, `crs`, `priorities`)
-3. `git push origin <branch-name>`
-4. **NO hacer merge** — informar al usuario que el branch está listo para validación local
+3. `git push origin feature/<story-id>-<feature-name>`
+4. **Si es la última capa (frontend):** abrir PR
+5. **Si NO es la última capa (db o backend):** continuar en el mismo branch con la siguiente capa
 
-El merge a `main` solo ocurre después de que el usuario valide localmente y apruebe el PR.
+> El PR se abre **una única vez** al completar todas las capas de la US. El merge a `main` solo ocurre después de que el usuario valide localmente y apruebe el PR.
 
 ## Paso 6 — Reporte de Completitud
 
@@ -110,8 +111,10 @@ Archivos creados:
 Archivos modificados:
   <lista de archivos editados y qué cambió>
 
-Branch pusheado: <nombre del branch>
+Branch: feature/<story-id>-<feature-name>
+Commit pusheado: <descripción del commit>
 
 Siguiente paso:
-  Validar localmente → aprobar PR → /develop-plan <story-id> <siguiente-capa>
+  [Si quedan capas] Continuar en el mismo branch → /develop-plan <story-id> <siguiente-capa>
+  [Si es la última capa] Validar localmente → abrir PR → merge a main
 ```

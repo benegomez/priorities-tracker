@@ -20,11 +20,14 @@ A partir de `$ARGUMENTS`, identifica qué documentos deben actualizarse:
 | Cambio de stack / versión | `AmazonQ.md` sección 2, `docs/02-arquitectura/ADR/<nuevo-ADR>.md` si aplica |
 | Cambio de estándares | `.amazonq/rules/<rule-afectado>.md` |
 | Nueva decisión arquitectónica | `docs/02-arquitectura/ADR/ADR-XXX-<titulo>.md`, `AmazonQ.md` sección 7 |
+| Deuda técnica cerrada | `docs/technical-debt.md` — mover ítem de Activa a Cerrada + agregar PR y fecha |
+| Deuda técnica nueva | `docs/technical-debt.md` — agregar ítem en Deuda Activa |
 
 ## Paso 2 — Tomar Contexto Actual
 
 Antes de editar, lee:
 - `AmazonQ.md` — siempre
+- `docs/technical-debt.md` — siempre (verificar si alguna deuda puede cerrarse con los cambios actuales)
 - El documento específico identificado en el paso 1
 
 ## Paso 3 — Aplicar Actualizaciones
@@ -60,10 +63,12 @@ Antes de editar, lee:
 - [ ] Los enums en `domain-standards.md` coinciden con `docs/04-domain/`
 - [ ] Los endpoints en `api-standards.md` coinciden con `docs/06-api-implementation/`
 - [ ] No hay información duplicada entre rules y docs
+- [ ] `docs/technical-debt.md` está actualizado: deuda cerrada movida a la tabla correcta, historial actualizado
 
 ## Paso 5 — Confirmar
 
 Responde con:
 - Lista de archivos actualizados con su ruta
 - Resumen de qué cambió en cada uno
+- Deuda técnica cerrada en este update (IDs) — o “none”
 - Si algún documento quedó desactualizado y requiere atención futura, advertirlo explícitamente

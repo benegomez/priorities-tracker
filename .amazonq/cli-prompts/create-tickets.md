@@ -219,7 +219,7 @@ Herramienta: `Playwright`
 - [ ] `test_cross_tenant_access_returns_403`
 
 ## Git Branch
-`feature/<feature-name>-backend`
+`feature/<story-id>-<feature-name>` — branch único compartido con DB y FE de la misma US
 ```
 
 ## Paso 5 — Ticket Frontend
@@ -308,9 +308,122 @@ Herramienta: `Playwright`
 - [ ] Navegación por teclado
 
 ## Git Branch
-`feature/<feature-name>-frontend`
+`feature/<story-id>-<feature-name>` — branch único compartido con DB y BE de la misma US
 ```
 
-## Paso 6 — Confirmar
+## Paso 6 — Ticket Infra (Opcional)
 
-Responde con la lista de tickets creados y sus rutas. Siguiente paso sugerido: `/create-plan <story-id>`
+Generar este ticket **solo si** la sección `[enhanced]` de la US declara una dependencia técnica de infraestructura nueva — es decir, un servicio que no existe en el `docker-compose.yml` actual (ej. Redis, worker, AI Gateway).
+
+Si no hay nueva infraestructura requerida, **omitir este paso**.
+
+Plantilla para `tickets/infra/ticket.md`:
+
+```markdown
+---
+status: todo
+type: infra
+story: <ruta al UserStory.md>
+depends-on: tickets/backend/ticket.md
+---
+
+# [INFRA] <Feature Name> — <Nombre del Nuevo Servicio>
+
+## Objetivo
+<qué servicio se agrega y por qué lo requiere esta US>
+
+## Scope
+Solo cambios en `docker-compose.yml` y `.env.example` del repositorio GitHub.
+Los cambios de producción van en el repo GitLab de deploy.
+
+## Cambios en docker-compose.yml
+
+### Nuevo servicio: `<nombre>`
+```yaml
+  <nombre>:
+    image: <imagen>:<version>
+    container_name: priorities-tracker-<nombre>
+    ports:
+      - "<host>:<interno>"
+    environment:
+      - <VAR>=<valor-dev>
+    healthcheck:
+      test: ["CMD", "<comando-healthcheck>"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - priorities-net
+    restart: unless-stopped
+```
+
+## Nuevas Variables en .env.example
+```bash
+# ── <Nombre del servicio> ──────────────────────────────────
+# <descripción de para qué se usa>
+<VARIABLE_NAME>=<valor-ejemplo>
+```
+
+## Criterios de Aceptación
+- [ ] Servicio agregado al docker-compose.yml con health check
+- [ ] Variables documentadas en .env.example con comentarios
+- [ ] `docker compose up` levanta sin errores
+- [ ] Health check del nuevo servicio pasa
+- [ ] El servicio es accesible desde el contenedor `api`
+- [ ] Compatibilidad Kubernetes verificada (stateless, config externalizada)
+
+## Dependencias
+Requiere que el ticket backend esté definido (para saber qué variables necesita).
+
+## Git Branch
+`feature/<story-id>-<feature-name>` — branch único compartido con todas las capas de la misma US
+```
+
+---
+
+## Paso 7 — Registrar Deuda Técnica
+
+Antes de confirmar, revisa los tickets creados y detecta tests o criterios que hayan quedado marcados como "pendiente" o "diferido".
+
+Para cada ítem de deuda identificado:
+1. Abre `docs/technical-debt.md`
+2. Agrega un nuevo ítem en la tabla **Deuda Activa** con el siguiente formato:
+
+```markdown
+### TD-XXX — <descripción corta>
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-XXX |
+| **Estado** | `open` |
+| **Prioridad** | P1 / P2 / P3 |
+| **Módulo** | `<módulo>` |
+| **Origen** | US-XXX `feature/<branch>` |
+| **Descripción** | <qué falta y por qué no se implementó ahora> |
+| **Causa raíz** | <razón técnica o de prioridad> |
+| **Criterio de cierre** | <condición concreta y verificable para cerrar este ítem> |
+| **Cuándo cerrar** | <evento o momento recomendado> |
+```
+
+Asignar prioridad según:
+- `P1` — bloquea seguridad o calidad crítica
+- `P2` — afecta cobertura de tests en flujos Critical/High
+- `P3` — mejora de calidad no urgente
+
+Si no hay deuda nueva, indicarlo explícitamente: “No se registró deuda técnica nueva.”
+
+También actualizar la tabla **Historial de Cambios** al final del archivo.
+
+---
+
+## Paso 8 — Confirmar
+
+Responde con la lista de tickets creados y sus rutas. Indicar explícitamente si el ticket infra fue generado o no y por qué.
+
+Indicar también:
+- Deuda técnica registrada en `docs/technical-debt.md` (IDs y descripción breve)
+- O bien: “No se registró deuda técnica nueva.”
+
+> **Regla de branching:** todos los tickets de una misma US comparten un único branch `feature/<story-id>-<feature-name>`. El orden de implementación (DB → BE → FE) se gestiona con commits y el `plan.md`, no con branches separados.
+
+Siguiente paso sugerido: `/create-plan <story-id>`

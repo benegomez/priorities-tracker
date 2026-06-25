@@ -42,7 +42,9 @@ progress: 0 / <total> tasks completed
 ## Fase 1 · Prerequisitos
 - [ ] PostgreSQL corriendo: `docker compose ps`
 - [ ] Última versión del branch principal: `git pull origin main`
-- [ ] Crear branch: `git checkout -b <branch-name>`
+- [ ] Crear branch único de la US: `git checkout -b feature/<story-id>-<feature-name>`
+
+> Este branch se reutiliza para DB, BE y FE de la misma US. Si ya existe (capas anteriores ya commiteadas), hacer `git checkout feature/<story-id>-<feature-name>` sin `-b`.
 
 ## Fase 2 · Migración Alembic
 _Archivo: `apps/backend/src/shared/database/migrations/<YYYYMMDDHHMI>_<descripcion>.py`_
@@ -65,8 +67,8 @@ _Archivo: `apps/backend/src/shared/database/migrations/<YYYYMMDDHHMI>_<descripci
 
 ## Fase 5 · Entrega
 - [ ] Commit: `git commit -m "feat(db): <descripción>"`
-- [ ] Push: `git push origin <branch-name>`
-- [ ] Abrir PR — NO hacer merge sin validación
+- [ ] Push: `git push origin feature/<story-id>-<feature-name>`
+- [ ] Continuar en el mismo branch con el ticket backend — NO abrir PR hasta completar todas las capas
 ```
 
 ---
@@ -86,8 +88,8 @@ progress: 0 / <total> tasks completed
 > Marca cada tarea con `- [x]` al completarla. Actualiza `progress` en el frontmatter.
 
 ## Fase 1 · Prerequisitos
-- [ ] Ticket database mergeado y migración aplicada
-- [ ] `git pull origin main` y crear branch: `git checkout -b <branch-name>`
+- [ ] Ticket database commiteado en el mismo branch
+- [ ] Continuar en branch existente: `git checkout feature/<story-id>-<feature-name>`
 - [ ] Leer `.amazonq/rules/backend-standards.md` y `domain-standards.md`
 
 ## Fase 2 · Contrato OpenAPI
@@ -141,8 +143,8 @@ _Archivos en `tests/unit/` e `tests/integration/`_
 
 ## Fase 9 · Entrega
 - [ ] Commit: `git commit -m "feat(<module>): <descripción>"`
-- [ ] Push: `git push origin <branch-name>`
-- [ ] Abrir PR — NO hacer merge sin validación del usuario
+- [ ] Push: `git push origin feature/<story-id>-<feature-name>`
+- [ ] Continuar en el mismo branch con el ticket frontend — NO abrir PR hasta completar todas las capas
 ```
 
 ---
@@ -163,7 +165,7 @@ progress: 0 / <total> tasks completed
 
 ## Fase 1 · Prerequisitos
 - [ ] Endpoint backend disponible y respondiendo correctamente
-- [ ] `git pull origin main` y crear branch: `git checkout -b <branch-name>`
+- [ ] Continuar en branch existente: `git checkout feature/<story-id>-<feature-name>`
 - [ ] Leer `.amazonq/rules/frontend-standards.md`
 
 ## Fase 2 · Schema de Validación (Zod)
@@ -211,8 +213,8 @@ _Archivos en `tests/`_
 
 ## Fase 9 · Entrega
 - [ ] Commit: `git commit -m "feat(<feature>): <descripción>"`
-- [ ] Push: `git push origin <branch-name>`
-- [ ] Abrir PR — NO hacer merge sin validación del usuario
+- [ ] Push: `git push origin feature/<story-id>-<feature-name>`
+- [ ] Abrir PR ahora que todas las capas están completas — NO hacer merge sin validación del usuario
 ```
 
 ---
@@ -224,6 +226,9 @@ Planes creados para: <story-id>
   <path/database/plan.md>  -- [DB] <Feature Name>  (<N> tasks)
   <path/backend/plan.md>   -- [BE] <Feature Name>  (<N> tasks)
   <path/frontend/plan.md>  -- [FE] <Feature Name>  (<N> tasks)
+
+Branch único: feature/<story-id>-<feature-name>
+  DB commit → BE commit → FE commit → PR único
 
 Siguiente paso: /develop-plan <story-id> database
 ```
