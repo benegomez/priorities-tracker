@@ -2,115 +2,164 @@
 
 ## Objetivo
 
-Gestionar compromisos semanales y trabajo ejecutable.
+Gestionar compromisos semanales (prioridades) y trabajo ejecutable (tareas).
+
+---
+
+## Estado de Implementación
+
+| Componente | Estado |
+|---|---|
+| Domain entities | ✅ Priority + Task |
+| Repository interfaces | ✅ 2 ABCs |
+| Repository impls (SQLAlchemy async) | ✅ 2 implementados |
+| Use cases | ✅ 2 implementados |
+| API router | ✅ 2 endpoints |
+| Unit tests | ✅ 8 tests |
+
+---
+
+## Estructura de Archivos
+
+```
+modules/priorities/
+├── api/
+│   ├── router.py           # POST /priorities, POST /priorities/{id}/tasks
+│   └── schemas.py          # PriorityCreate, PriorityResponse, TaskCreate, TaskResponse
+├── application/
+│   └── commands/
+│       ├── create_priority.py   # CreatePriorityUseCase
+│       └── create_task.py       # CreateTaskUseCase
+├── domain/
+│   ├── entities/
+│   │   ├── priority.py         # Priority dataclass
+│   │   └── task.py             # Task dataclass
+│   └── repositories/
+│       ├── priority_repository.py  # ABC interface
+│       └── task_repository.py      # ABC interface
+├── infrastructure/
+│   └── repositories/
+│       ├── priority_repository_impl.py  # SQLAlchemy async
+│       └── task_repository_impl.py      # SQLAlchemy async
+└── tests/
+    └── unit/
+        └── test_priority_use_cases.py
+```
+
+---
 
 ## Ownership
 
-- Priority
-- Task
+| Entidad | Módulo owner |
+|---|---|
+| Project | `projects` (futuro) |
+| ProjectPhase | `projects` (futuro) |
+| Priority | `priorities` ✅ |
+| Task | `priorities` ✅ |
 
-## Relación de Dominio
-
-Project
-    ↓
-ProjectPhase
-    ↓
-Priority
-    ↓
-Task
-
-## Responsabilidades
-
-- Crear prioridades.
-- Gestionar tareas.
-- Seguimiento semanal.
-- Continuidad entre semanas.
-- Preparar información para CRS.
+---
 
 ## Entidades
 
 ### Priority
 
-Compromiso semanal definido por el colaborador.
+| Campo | Tipo | Descripción |
+|---|---|---|
+| id | UUID | PK |
+| checkin_id | UUID | FK → check_ins |
+| phase_id | UUID | FK → project_phases |
+| owner_id | UUID | FK → users |
+| organization_id | UUID | FK → organizations |
+| week_start | date | Semana del compromiso |
+| title | str | Título (max 255, no vacío) |
+| description | str | null | Descripción opcional |
+| priority_level | str | `low` / `medium` / `high` |
+| status | str | State machine |
+| created_at | datetime | Auditoría |
+| updated_at | datetime | Auditoría |
 
-Campos:
+#### State Machine — Priority
 
-- id
-- phase_id
-- title
-- description
-- status
+```
+draft → planned → in_progress → completed
+                       └──────→ carried_over
+```
 
 ### Task
 
-Unidad mínima de trabajo.
+| Campo | Tipo | Descripción |
+|---|---|---|
+| id | UUID | PK |
+| priority_id | UUID | FK → priorities |
+| organization_id | UUID | FK → organizations |
+| title | str | Título (max 255, no vacío) |
+| description | str | null | Descripción opcional |
+| status | str | State machine |
+| created_at | datetime | Auditoría |
+| updated_at | datetime | Auditoría |
 
-Campos:
+#### State Machine — Task
 
-- id
-- priority_id
-- title
-- status
+```
+pending → in_progress → completed
+              └──────→ cancelled
+```
 
-## Ciclo de Vida de Prioridad
+---
 
-Draft -> Planned -> In Progress -> Completed -> Carried Over
+## Casos de Uso Implementados
 
-## Ciclo de Vida de Tarea
+### CreatePriorityUseCase
 
-Pending -> In Progress -> Completed -> Cancelled
+- Valida checkin existe y pertenece al empleado (BR-013)
+- Valida checkin en status `draft` (no acepta prioridades si ya submitted)
+- Valida phase existe y pertenece a la misma organización (BR-016)
+- Valida project de la phase está `active` (BR-004)
+- Persiste priority con status `draft`
 
-## Casos de Uso
+### CreateTaskUseCase
 
-- CreatePriorityUseCase
-- UpdatePriorityUseCase
-- CarryOverPriorityUseCase
-- CreateTaskUseCase
-- CompleteTaskUseCase
+- Valida priority existe y pertenece al empleado (BR-005, BR-013)
+- Persiste task con status `pending`
+
+---
 
 ## Reglas de Negocio
 
-- Toda prioridad pertenece a una fase.
-- Toda tarea pertenece a una prioridad.
-- Una prioridad puede continuar a otra semana.
-- Las tareas completadas no se copian automáticamente.
+| BR | Descripción | Validación |
+|---|---|---|
+| BR-003 | Prioridad debe pertenecer a una fase | FK + use case |
+| BR-004 | Fase debe pertenecer a proyecto activo | Query en use case |
+| BR-005 | Tarea debe pertenecer a una prioridad | FK + use case |
+| BR-013 | Empleado solo ve sus propias prioridades | Ownership check |
+| BR-016 | Aislamiento multi-tenant | organization_id from JWT |
+
+---
 
 ## Relación con Check-In
 
-Durante Check-In:
+Durante Check-In (status `draft`):
+1. Empleado crea prioridades asociadas al check-in
+2. Cada prioridad requiere seleccionar fase (→ proyecto)
+3. Tareas se agregan inline a cada prioridad
 
-1. Seleccionar proyecto.
-2. Seleccionar fase.
-3. Crear prioridad.
-4. Crear tareas.
+Al submit del Check-In:
+- Prioridades transicionan de `draft` → `planned`
 
-## Relación con Check-Out
+---
 
-Durante Check-Out:
+## Relación con CRS (futuro)
 
-- Marcar prioridades completadas.
-- Marcar tareas completadas.
-- Seleccionar elementos a continuar.
+El módulo CRS utilizará:
+- Prioridades comprometidas vs completadas
+- Tareas comprometidas vs completadas
+- Prioridades con carry-over
 
-## Relación con CRS
+---
 
-El módulo CRS utiliza:
+## Endpoints Pendientes (futuras US)
 
-- Prioridades comprometidas.
-- Prioridades completadas.
-- Tareas comprometidas.
-- Tareas completadas.
-- Arrastres.
-
-## Métricas
-
-- Prioridades creadas.
-- Prioridades completadas.
-- Tareas completadas.
-- Tasa de arrastre.
-
-## Invariantes
-
-- No existen tareas sin prioridad.
-- No existen prioridades sin fase.
-- No existen prioridades sin proyecto indirecto.
+- `GET /api/v1/priorities` — listar prioridades del empleado
+- `PATCH /api/v1/priorities/{id}` — actualizar estado
+- `POST /api/v1/priorities/{id}/carry-over` — continuar a siguiente semana
+- `PATCH /api/v1/priorities/{id}/tasks/{task_id}` — actualizar tarea

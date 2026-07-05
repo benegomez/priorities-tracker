@@ -91,11 +91,12 @@ Weekly Check-In
 
 Layer	Artifact
 Product Feature	Weekly Check-In
-User Story	Register Weekly Priorities
-Use Case	Weekly Planning
-Domain Entity	CheckIn
-Database Table	checkins
-API Schema	CheckInCreate, CheckInResponse
+User Story	US-001 Register Weekly Priorities
+Use Case	CreateCheckIn, SubmitCheckIn, GetCurrentCheckIn
+Domain Entity	WeeklyCheckIn
+Database Table	check_ins
+API Schema	CheckInCreate, CheckInResponse, CheckInSubmitResponse
+Implementation	✅ Implemented (PR #2)
 
 ⸻
 
@@ -103,11 +104,12 @@ Priority Management
 
 Layer	Artifact
 Product Feature	Priority Management
-User Story	Create Priorities
-Use Case	Weekly Planning
-Domain Entity	Priority
-Database Table	priorities
-API Schema	PriorityCreate, PriorityUpdate, PriorityResponse
+User Story	US-001 Create Priorities
+Use Case	CreatePriority, CreateTask
+Domain Entity	Priority, Task
+Database Table	priorities, tasks
+API Schema	PriorityCreate, PriorityResponse, TaskCreate, TaskResponse
+Implementation	✅ Implemented (PR #2)
 
 ⸻
 
@@ -115,11 +117,12 @@ Task Management
 
 Layer	Artifact
 Product Feature	Task Management
-User Story	Register Tasks
-Use Case	Weekly Planning
+User Story	US-001 Register Tasks
+Use Case	CreateTask
 Domain Entity	Task
 Database Table	tasks
-API Schema	TaskCreate, TaskUpdate, TaskResponse
+API Schema	TaskCreate, TaskResponse
+Implementation	✅ Implemented (PR #2)
 
 ⸻
 
@@ -304,4 +307,4 @@ Every MVP capability is represented throughout the architecture stack, ensuring 
 
 Project Status:
 
-READY FOR IMPLEMENTATION
+IN PROGRESS — US-001 (Check-In) and US-002 (Auth) implemented.
