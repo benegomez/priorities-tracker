@@ -2,21 +2,22 @@
 
 import { useState } from "react";
 import { useCreatePriority } from "../hooks/useCreatePriority";
+import { useAvailablePhases } from "@/features/projects/hooks/useAvailablePhases";
 import type { ApiError } from "@/lib/api-client";
 import type { PriorityResponse } from "../services/priority-service";
 
 interface PriorityFormProps {
   checkinId: string;
-  phases: { id: string; name: string; project_name: string }[];
   onPriorityCreated?: (priority: PriorityResponse) => void;
 }
 
-export function PriorityForm({ checkinId, phases, onPriorityCreated }: PriorityFormProps) {
+export function PriorityForm({ checkinId, onPriorityCreated }: PriorityFormProps) {
   const [phaseId, setPhaseId] = useState("");
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState<"low" | "medium" | "high">("medium");
   const [description, setDescription] = useState("");
   const { mutate, isPending, error } = useCreatePriority(checkinId);
+  const { data: phases = [], isLoading: phasesLoading } = useAvailablePhases();
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,7 +43,7 @@ export function PriorityForm({ checkinId, phases, onPriorityCreated }: PriorityF
   const apiError = error as ApiError | null;
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border p-4 space-y-3 bg-gray-50">
+    <form onSubmit={handleSubmit} className="rounded-lg border border-border p-4 space-y-3 bg-surface">
       <h3 className="font-medium text-sm">Agregar Prioridad</h3>
 
       <div>
@@ -53,10 +54,11 @@ export function PriorityForm({ checkinId, phases, onPriorityCreated }: PriorityF
           id="phase-select"
           value={phaseId}
           onChange={(e) => setPhaseId(e.target.value)}
-          className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
           required
+          disabled={phasesLoading}
         >
-          <option value="">Selecciona una fase...</option>
+          <option value="">{phasesLoading ? "Cargando fases..." : "Selecciona una fase..."}</option>
           {phases.map((phase) => (
             <option key={phase.id} value={phase.id}>
               {phase.project_name} → {phase.name}
@@ -74,7 +76,7 @@ export function PriorityForm({ checkinId, phases, onPriorityCreated }: PriorityF
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
           placeholder="¿Qué te comprometes a lograr?"
           maxLength={255}
           required
@@ -89,7 +91,7 @@ export function PriorityForm({ checkinId, phases, onPriorityCreated }: PriorityF
           id="priority-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
           rows={2}
           maxLength={1000}
         />
@@ -103,7 +105,7 @@ export function PriorityForm({ checkinId, phases, onPriorityCreated }: PriorityF
           id="priority-level"
           value={level}
           onChange={(e) => setLevel(e.target.value as "low" | "medium" | "high")}
-          className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
         >
           <option value="high">Alta</option>
           <option value="medium">Media</option>
@@ -114,13 +116,13 @@ export function PriorityForm({ checkinId, phases, onPriorityCreated }: PriorityF
       <button
         type="submit"
         disabled={isPending || !title.trim() || !phaseId}
-        className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+        className="rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary-dark disabled:opacity-50"
       >
         {isPending ? "Agregando..." : "Agregar Prioridad"}
       </button>
 
       {apiError && (
-        <p className="text-sm text-red-600" role="alert" aria-live="polite">
+        <p className="text-sm text-danger" role="alert" aria-live="polite">
           {apiError.message}
         </p>
       )}
