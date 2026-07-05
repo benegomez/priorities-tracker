@@ -154,11 +154,12 @@ Weekly Check-Out
 
 Layer	Artifact
 Product Feature	Weekly Check-Out
-User Story	Complete Weekly Results
-Use Case	Weekly Closure
-Domain Entity	CheckOut
-Database Table	checkouts
-API Schema	CheckOutCreate, CheckOutResponse
+User Story	US-003 Complete Weekly Results
+Use Case	CreateCheckOut, MarkPriorityCompleted, MarkTaskCompleted, SubmitCheckOut, GetCurrentCheckOut
+Domain Entity	WeeklyCheckOut
+Database Table	check_outs, crs_scores
+API Schema	CheckOutCreate, CheckOutResponse, CheckOutSubmitResponse, MarkCompletedRequest
+Implementation	✅ Implemented (PR #4)
 
 ⸻
 

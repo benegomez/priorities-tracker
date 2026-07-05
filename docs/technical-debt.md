@@ -155,6 +155,118 @@
 
 ---
 
+### TD-009 — Contract tests (schemathesis) para checkout
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-009 |
+| **Estado** | `open` |
+| **Prioridad** | P2 |
+| **Módulo** | `checkout` |
+| **Origen** | US-003 `feature/003-weekly-checkout` |
+| **Descripción** | Los 5 endpoints del módulo checkout no tienen contract tests con `schemathesis`. La validación se hace implícitamente por los unit tests y verificación funcional via curl. |
+| **Causa raíz** | `schemathesis` no está configurado en el proyecto. Misma causa que TD-002/TD-005. |
+| **Criterio de cierre** | Crear `tests/contract/test_checkout_contract.py` con los 5 endpoints. |
+| **Cuándo cerrar** | Al resolver TD-002 (configurar schemathesis una vez cubre todos los módulos). |
+
+---
+
+### TD-010 — E2E tests (Playwright) para flujo de Check-Out
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-010 |
+| **Estado** | `open` |
+| **Prioridad** | P2 |
+| **Módulo** | `checkout` (frontend + backend) |
+| **Origen** | US-003 `feature/003-weekly-checkout` |
+| **Descripción** | El flujo completo de Check-Out (crear → marcar prioridades/tareas → submit → summary) no tiene tests E2E automatizados. |
+| **Causa raíz** | Playwright no está configurado. Misma causa que TD-004/TD-006. |
+| **Criterio de cierre** | Crear `tests/e2e/test_checkout_flow.spec.ts` con happy path + edge cases. |
+| **Cuándo cerrar** | Al resolver TD-004 (configurar Playwright una vez). |
+
+---
+
+### TD-011 — Security tests pendientes para checkout
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-011 |
+| **Estado** | `open` |
+| **Prioridad** | P2 |
+| **Módulo** | `checkout` |
+| **Origen** | US-003 `feature/003-weekly-checkout` |
+| **Descripción** | Faltan tests explícitos de seguridad para checkout: cross-tenant, acceso a checkout de otro empleado, 401 sin token. La lógica está implementada pero sin tests dedicados. |
+| **Causa raíz** | Se priorizó la cobertura funcional sobre tests de seguridad dedicados. |
+| **Criterio de cierre** | Crear `tests/security/test_checkout_security.py` con al menos 3 tests de aislamiento. |
+| **Cuándo cerrar** | Antes del primer deploy a staging. |
+
+---
+
+### TD-012 — CRS calculation no implementado (solo placeholder)
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-012 |
+| **Estado** | `open` |
+| **Prioridad** | P1 |
+| **Módulo** | `crs`, `checkout` |
+| **Origen** | US-003 `feature/003-weekly-checkout` |
+| **Descripción** | El submit del Check-Out tiene un `TODO: invoke CRS module when implemented`. La tabla `crs_scores` existe pero el cálculo real del CRS (fórmula v1.0 con 4 componentes) no está implementado. Solo se registra un log info. |
+| **Causa raíz** | El módulo `crs` es una US separada. Se dejó el placeholder best-effort para no bloquear el checkout. |
+| **Criterio de cierre** | Implementar `CRSCalculationService` con la fórmula v1.0 (40% prioridades + 30% tareas + 20% consistencia + 10% arrastre), persistir en `crs_scores`, e invocar desde `SubmitCheckOutUseCase`. |
+| **Cuándo cerrar** | En la US de CRS (próxima US crítica del roadmap). |
+
+---
+
+### TD-013 — Integration tests para checkout endpoints
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-013 |
+| **Estado** | `open` |
+| **Prioridad** | P2 |
+| **Módulo** | `checkout` |
+| **Origen** | US-003 `feature/003-weekly-checkout` |
+| **Descripción** | El módulo checkout solo tiene 7 unit tests. Faltan integration tests que validen los endpoints contra la base de datos real (similar a los de checkin). |
+| **Causa raíz** | Se verificó funcionalmente via curl pero no se automatizaron los integration tests. |
+| **Criterio de cierre** | Crear `tests/integration/test_checkout_endpoints.py` con al menos 8 tests (POST 201, POST 409, GET 200, GET 404, PATCH priority, PATCH task, submit 200, submit 409). |
+| **Cuándo cerrar** | En la próxima US que toque el módulo `checkout`. |
+
+---
+
+### TD-014 — Component tests para CheckIn detail y CheckOut flow
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-014 |
+| **Estado** | `open` |
+| **Prioridad** | P3 |
+| **Módulo** | `checkin`, `checkout` (frontend) |
+| **Origen** | US-003, US-005 |
+| **Descripción** | Los nuevos componentes de US-003 (CheckOutForm, CheckOutPriorityCard, CheckOutTaskItem, etc.) y US-005 (CheckInDetail, CheckInPriorityCard, ResubmitButton, CheckInLockedBanner) no tienen component tests dedicados. |
+| **Causa raíz** | Se priorizó la entrega funcional. Los tests existentes (47) cubren los componentes originales pero no los nuevos. |
+| **Criterio de cierre** | Crear `tests/checkout-flow.test.tsx` y `tests/checkin-detail.test.tsx` con al menos 12 tests cada uno (según lo definido en los tickets). |
+| **Cuándo cerrar** | En la próxima iteración de calidad o al tocar estos módulos. |
+
+---
+
+### TD-015 — Monday validation skipped en desarrollo
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-015 |
+| **Estado** | `open` |
+| **Prioridad** | P3 |
+| **Módulo** | `checkin` |
+| **Origen** | US-004 (fix durante testing) |
+| **Descripción** | La validación de que `week_start` sea lunes está deshabilitada en `ENVIRONMENT=development`. El test correspondiente se salta con `pytest.skip`. Esto es intencional para facilitar testing, pero el test no valida la lógica en CI. |
+| **Causa raíz** | Se necesitaba probar cualquier día de la semana durante desarrollo. |
+| **Criterio de cierre** | En CI (GitHub Actions), ejecutar con `ENVIRONMENT=production` para que el test de Monday validation se ejecute. O crear un test que force el environment a production via monkeypatch. |
+| **Cuándo cerrar** | Al configurar GitHub Actions CI pipeline. |
+
+---
+
 ## Deuda Cerrada
 
 | ID | Descripción | Cerrada en | PR |
@@ -167,5 +279,6 @@
 
 | Fecha | Acción | US |
 |---|---|---|
+| 2026-07-05 | Registro: TD-009 a TD-015 | US-003, US-004, US-005 |
 | 2025-06-23 | Registro: TD-005, TD-006, TD-007, TD-008 | US-001 |
 | 2026-06-23 | Registro inicial: TD-001, TD-002, TD-003, TD-004 | US-002 |

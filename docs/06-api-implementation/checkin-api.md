@@ -6,7 +6,7 @@
 /api/v1/checkins
 ```
 
-## Estado: ✅ Implementado (US-001)
+## Estado: ✅ Implementado (US-001, US-005)
 
 ---
 
@@ -14,7 +14,7 @@
 
 ### GET /api/v1/checkins/current
 
-Obtiene el check-in de la semana actual del empleado autenticado.
+Obtiene el check-in de la semana actual con prioridades y tareas anidadas.
 
 | Campo | Valor |
 |---|---|
@@ -28,12 +28,27 @@ Obtiene el check-in de la semana actual del empleado autenticado.
   "id": "uuid",
   "employee_id": "uuid",
   "organization_id": "uuid",
-  "week_start": "2025-01-06",
-  "status": "draft",
-  "submitted_at": null,
+  "week_start": "2026-07-05",
+  "status": "submitted",
+  "submitted_at": "2026-07-05T08:00:00Z",
   "priorities_count": 2,
-  "created_at": "2025-01-06T08:00:00Z",
-  "updated_at": "2025-01-06T08:00:00Z"
+  "priorities": [
+    {
+      "id": "uuid",
+      "title": "Implementar login",
+      "description": "Flujo completo de autenticación",
+      "priority_level": "high",
+      "status": "planned",
+      "phase_name": "Desarrollo",
+      "project_name": "Proyecto Alpha",
+      "tasks": [
+        { "id": "uuid", "title": "Crear endpoint", "status": "pending" },
+        { "id": "uuid", "title": "Agregar tests", "status": "pending" }
+      ]
+    }
+  ],
+  "created_at": "2026-07-05T08:00:00Z",
+  "updated_at": "2026-07-05T08:00:00Z"
 }
 ```
 
@@ -54,29 +69,16 @@ Crea un nuevo check-in semanal.
 **Request body:**
 ```json
 {
-  "week_start": "2025-01-06"
+  "week_start": "2026-07-05"
 }
 ```
 
-> `week_start` debe ser un lunes (ISO weekday 1).
+> En producción, `week_start` debe ser un lunes. En desarrollo, acepta cualquier día.
 
-**Response 201:**
-```json
-{
-  "id": "uuid",
-  "employee_id": "uuid",
-  "organization_id": "uuid",
-  "week_start": "2025-01-06",
-  "status": "draft",
-  "submitted_at": null,
-  "priorities_count": 0,
-  "created_at": "2025-01-06T08:00:00Z",
-  "updated_at": "2025-01-06T08:00:00Z"
-}
-```
+**Response 201:** mismo schema que GET /current (con priorities vacío)
 
 **Errores:**
-- `400` — `week_start` no es lunes
+- `400` — `week_start` no es lunes (solo producción)
 - `401` — Token inválido o expirado
 - `409` — BR-001: ya existe check-in para esta semana
 
@@ -84,7 +86,7 @@ Crea un nuevo check-in semanal.
 
 ### POST /api/v1/checkins/{id}/submit
 
-Envía el check-in (transiciona a `submitted`).
+Envía el check-in. Soporta primer submit y re-submit.
 
 | Campo | Valor |
 |---|---|
@@ -94,12 +96,17 @@ Envía el check-in (transiciona a `submitted`).
 
 **Request body:** vacío `{}`
 
+**Comportamiento:**
+- **Primer submit (desde draft):** transiciona TODAS las prioridades a `planned`
+- **Re-submit (desde submitted):** transiciona solo prioridades en `draft` a `planned`, no afecta las ya en `planned`
+- Actualiza `submitted_at` en ambos casos
+
 **Response 200:**
 ```json
 {
   "id": "uuid",
   "status": "submitted",
-  "submitted_at": "2025-01-06T08:30:00Z"
+  "submitted_at": "2026-07-05T08:30:00Z"
 }
 ```
 
@@ -107,7 +114,7 @@ Envía el check-in (transiciona a `submitted`).
 - `401` — Token inválido
 - `403` — Check-in no pertenece al empleado
 - `404` — Check-in no encontrado
-- `409` — Check-in sin prioridades, o ya fue submitted
+- `409` — Check-in sin prioridades, o en estado `closed`
 
 ---
 
@@ -118,12 +125,15 @@ Envía el check-in (transiciona a `submitted`).
 | BR-001 | POST /checkins | 409 si duplicado |
 | BR-013 | POST /{id}/submit | 403 si no es owner |
 | BR-016 | Todos | organization_id from JWT |
-| BR-017 | Todos | organization_id en entity |
+| NUEVA | POST /priorities (submitted) | Permite agregar si no existe checkout |
+| NUEVA | POST /{id}/submit (re-submit) | Solo transiciona draft → planned |
 
 ---
 
 ## Schemas Pydantic
 
 - `CheckInCreate` — `{ week_start: date }`
-- `CheckInResponse` — response completo con priorities_count
+- `CheckInTaskItem` — `{ id, title, status }`
+- `CheckInPriorityItem` — `{ id, title, description, priority_level, status, phase_name, project_name, tasks[] }`
+- `CheckInResponse` — response completo con priorities_count + priorities[]
 - `CheckInSubmitResponse` — `{ id, status, submitted_at }`
