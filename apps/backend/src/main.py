@@ -5,6 +5,8 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from src.modules.auth.api.router import limiter, router as auth_router
+from src.modules.checkin.api.router import router as checkin_router
+from src.modules.priorities.api.router import router as priorities_router
 
 app = FastAPI(
     title="Priorities Tracker API",
@@ -27,6 +29,8 @@ app.add_middleware(
 
 # Routers
 app.include_router(auth_router, prefix="/api/v1")
+app.include_router(checkin_router, prefix="/api/v1")
+app.include_router(priorities_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["health"])
