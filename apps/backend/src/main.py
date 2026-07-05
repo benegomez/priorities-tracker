@@ -9,6 +9,7 @@ from src.modules.checkin.api.router import router as checkin_router
 from src.modules.priorities.api.router import router as priorities_router
 from src.modules.checkout.api.router import router as checkout_router
 from src.modules.projects.api.router import router as projects_router
+from src.modules.crs.api.router import router as crs_router
 
 app = FastAPI(
     title="Priorities Tracker API",
@@ -35,6 +36,7 @@ app.include_router(checkin_router, prefix="/api/v1")
 app.include_router(priorities_router, prefix="/api/v1")
 app.include_router(checkout_router, prefix="/api/v1")
 app.include_router(projects_router, prefix="/api/v1")
+app.include_router(crs_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["health"])
