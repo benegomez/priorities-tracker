@@ -42,9 +42,22 @@ class CreatePriorityUseCase:
         if checkin.employee_id != command.employee_id:
             raise AuthorizationException("BR-013: Cannot add priorities to another employee's check-in")
 
-        # Check-in must be in draft to accept new priorities
-        if not checkin.is_draft:
-            raise BusinessRuleViolation("Cannot add priorities to a submitted check-in")
+        # Check-in must be in draft or submitted to accept new priorities
+        if checkin.status not in ("draft", "submitted"):
+            raise BusinessRuleViolation("Cannot add priorities to a closed check-in")
+
+        # If submitted, verify no checkout exists (locks the check-in)
+        if checkin.status == "submitted":
+            checkout_check = await self._session.execute(
+                text("""
+                    SELECT id FROM check_outs
+                    WHERE employee_id = :employee_id AND week_start = :week_start
+                      AND organization_id = :organization_id AND deleted_at IS NULL
+                """),
+                {"employee_id": command.employee_id, "week_start": checkin.week_start, "organization_id": command.organization_id},
+            )
+            if checkout_check.one_or_none() is not None:
+                raise BusinessRuleViolation("Check-In is locked by an existing Check-Out")
 
         # BR-003 + BR-004: validate phase exists, belongs to org, and project is active
         await self._validate_phase(command.phase_id, command.organization_id)

@@ -29,8 +29,8 @@ class WeeklyCheckIn:
             raise ValidationException("week_start must be a Monday (ISO weekday 0)")
 
     def submit(self, priorities_count: int) -> None:
-        if self.status != "draft":
-            raise BusinessRuleViolation("BR-001: Check-in can only be submitted from draft status")
+        if self.status not in ("draft", "submitted"):
+            raise BusinessRuleViolation("Check-in can only be submitted from draft or submitted status")
         if priorities_count < 1:
             raise BusinessRuleViolation("Check-in must have at least one priority to be submitted")
         self.status = "submitted"

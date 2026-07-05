@@ -1,10 +1,11 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.modules.auth.api.dependencies import CurrentUser, get_current_user
-from src.modules.checkin.api.schemas import CheckInCreate, CheckInResponse, CheckInSubmitResponse
+from src.modules.checkin.api.schemas import CheckInCreate, CheckInResponse, CheckInSubmitResponse, CheckInPriorityItem, CheckInTaskItem
 from src.modules.checkin.application.commands.create_checkin import CreateCheckInCommand, CreateCheckInUseCase
 from src.modules.checkin.application.commands.submit_checkin import SubmitCheckInCommand, SubmitCheckInUseCase
 from src.modules.checkin.application.queries.get_current_checkin import GetCurrentCheckInQuery, GetCurrentCheckInUseCase
@@ -14,6 +15,48 @@ from src.shared.database.session import get_db_session
 from src.shared.exceptions.base import AuthorizationException, BusinessRuleViolation, ValidationException
 
 router = APIRouter(prefix="/checkins", tags=["checkin"])
+
+
+async def _load_priorities_with_tasks(session: AsyncSession, checkin_id: UUID, organization_id: UUID) -> list[CheckInPriorityItem]:
+    result = await session.execute(
+        text("""
+            SELECT pr.id, pr.title, pr.description, pr.priority_level, pr.status,
+                   pp.name as phase_name, p.name as project_name
+            FROM priorities pr
+            LEFT JOIN project_phases pp ON pr.phase_id = pp.id
+            LEFT JOIN projects p ON pp.project_id = p.id
+            WHERE pr.checkin_id = :checkin_id AND pr.organization_id = :organization_id AND pr.deleted_at IS NULL
+            ORDER BY pr.created_at
+        """),
+        {"checkin_id": checkin_id, "organization_id": organization_id},
+    )
+    priorities = result.fetchall()
+
+    priority_ids = [p.id for p in priorities]
+    tasks_by_priority: dict = {pid: [] for pid in priority_ids}
+
+    if priority_ids:
+        task_result = await session.execute(
+            text("""
+                SELECT id, priority_id, title, status
+                FROM tasks
+                WHERE priority_id = ANY(:priority_ids) AND organization_id = :organization_id AND deleted_at IS NULL
+                ORDER BY created_at
+            """),
+            {"priority_ids": priority_ids, "organization_id": organization_id},
+        )
+        for t in task_result.fetchall():
+            tasks_by_priority[t.priority_id].append(CheckInTaskItem(id=t.id, title=t.title, status=t.status))
+
+    return [
+        CheckInPriorityItem(
+            id=p.id, title=p.title, description=p.description,
+            priority_level=p.priority_level, status=p.status,
+            phase_name=p.phase_name, project_name=p.project_name,
+            tasks=tasks_by_priority.get(p.id, []),
+        )
+        for p in priorities
+    ]
 
 
 @router.get(
@@ -41,6 +84,7 @@ async def get_current_checkin(
 
     priority_repo = PriorityRepositoryImpl(session)
     priorities_count = await priority_repo.count_by_checkin(checkin.id, current_user.organization_id)
+    priorities = await _load_priorities_with_tasks(session, checkin.id, current_user.organization_id)
 
     return CheckInResponse(
         id=checkin.id,
@@ -50,6 +94,7 @@ async def get_current_checkin(
         status=checkin.status,
         submitted_at=checkin.submitted_at,
         priorities_count=priorities_count,
+        priorities=priorities,
         created_at=checkin.created_at,
         updated_at=checkin.updated_at,
     )

@@ -2,15 +2,17 @@
 
 import { useState } from "react";
 import { useCurrentCheckIn } from "@/features/checkins/hooks/useCurrentCheckIn";
+import { useCurrentCheckOut } from "@/features/checkouts/hooks/useCurrentCheckOut";
 import { CheckInForm } from "@/features/checkins/components/CheckInForm";
 import { CheckInStatus } from "@/features/checkins/components/CheckInStatus";
+import { CheckInLockedBanner } from "@/features/checkins/components/CheckInLockedBanner";
+import { CheckInPriorityCard } from "@/features/checkins/components/CheckInPriorityCard";
+import { ResubmitButton } from "@/features/checkins/components/ResubmitButton";
 import { SubmitCheckInButton } from "@/features/checkins/components/SubmitCheckInButton";
-import { PriorityList } from "@/features/priorities/components/PriorityList";
 import { PriorityForm } from "@/features/priorities/components/PriorityForm";
+import { Badge } from "@/components/ui/badge";
 import type { ApiError } from "@/lib/api-client";
-import type { PriorityResponse } from "@/features/priorities/services/priority-service";
 
-// TODO: Fetch from API when projects module has list endpoint
 const MOCK_PHASES = [
   { id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", name: "Descubrimiento", project_name: "Proyecto Alpha" },
   { id: "cccccccc-cccc-cccc-cccc-cccccccccccc", name: "Desarrollo", project_name: "Proyecto Alpha" },
@@ -19,79 +21,128 @@ const MOCK_PHASES = [
 
 export default function CheckInPage() {
   const { data: checkin, isLoading, error } = useCurrentCheckIn();
-  const [priorities, setPriorities] = useState<PriorityResponse[]>([]);
+  const { data: checkout } = useCurrentCheckOut();
+  const [showAddForm, setShowAddForm] = useState(false);
 
-  function handlePriorityCreated(priority: PriorityResponse) {
-    setPriorities((prev) => [...prev, { ...priority, tasks: priority.tasks ?? [] }]);
-  }
-
-  function handleTaskCreated(priorityId: string, task: { id: string; priority_id: string; title: string; description: string | null; status: "pending" | "in_progress" | "completed" | "cancelled"; created_at: string; updated_at: string }) {
-    setPriorities((prev) =>
-      prev.map((p) =>
-        p.id === priorityId ? { ...p, tasks: [...p.tasks, task] } : p
-      )
-    );
+  function handlePriorityCreated() {
+    setShowAddForm(false);
   }
 
   if (isLoading) {
     return (
-      <div className="p-8" aria-live="polite">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-48 bg-gray-200 rounded" />
-          <div className="h-4 w-64 bg-gray-200 rounded" />
-        </div>
+      <div className="space-y-4 animate-pulse" aria-live="polite">
+        <div className="h-8 w-48 bg-gray-200 rounded-lg" />
+        <div className="h-4 w-64 bg-gray-200 rounded-lg" />
+        <div className="h-24 bg-gray-200 rounded-lg" />
       </div>
     );
   }
 
   const apiError = error as ApiError | null;
 
-  // No check-in exists for this week
+  // No check-in exists
   if (apiError?.status === 404 || !checkin) {
     return <CheckInForm />;
   }
 
-  // Unexpected error
   if (apiError) {
+    return <p className="text-danger" role="alert">Error: {apiError.message}</p>;
+  }
+
+  const isSubmitted = checkin.status === "submitted";
+  const isDraft = checkin.status === "draft";
+  const isLocked = isSubmitted && !!checkout;
+  const isEditable = isSubmitted && !checkout;
+  const totalPriorities = checkin.priorities_count ?? 0;
+  const newPrioritiesCount = (checkin.priorities ?? []).filter(p => p.status === "draft").length;
+
+  // ─── DRAFT: construction view (original flow) ───────────────────────
+  if (isDraft) {
     return (
-      <div className="p-8">
-        <p className="text-red-600" role="alert">Error: {apiError.message}</p>
+      <div className="space-y-6">
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">Check-In Semanal</h1>
+            <p className="text-sm text-secondary">Semana del {checkin.week_start}</p>
+          </div>
+          <CheckInStatus status={checkin.status} />
+        </header>
+
+        {/* Existing priorities from backend */}
+        <div className="space-y-3">
+          {(checkin.priorities ?? []).map((priority) => (
+            <CheckInPriorityCard
+              key={priority.id}
+              priority={priority}
+              checkinId={checkin.id}
+              editable={true}
+            />
+          ))}
+        </div>
+
+        <PriorityForm checkinId={checkin.id} phases={MOCK_PHASES} onPriorityCreated={handlePriorityCreated} />
+
+        <div className="flex justify-end pt-4 border-t border-border">
+          <SubmitCheckInButton checkinId={checkin.id} prioritiesCount={totalPriorities} />
+        </div>
       </div>
     );
   }
 
-  const isReadOnly = checkin.status !== "draft";
-  const totalPriorities = (checkin.priorities_count ?? 0) + priorities.length;
-
+  // ─── SUBMITTED: detail view (editable or locked) ────────────────────
   return (
     <div className="space-y-6">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Check-In Semanal</h1>
-          <p className="text-gray-600 text-sm">Semana del {checkin.week_start}</p>
-        </div>
-        <CheckInStatus status={checkin.status} />
-      </header>
-
-      <PriorityList priorities={priorities} checkinId={checkin.id} readOnly={isReadOnly} onTaskCreated={handleTaskCreated} />
-
-      {!isReadOnly && (
-        <>
-          <PriorityForm checkinId={checkin.id} phases={MOCK_PHASES} onPriorityCreated={handlePriorityCreated} />
-          <div className="flex justify-end pt-4 border-t">
-            <SubmitCheckInButton checkinId={checkin.id} prioritiesCount={totalPriorities} />
-          </div>
-        </>
-      )}
-
-      {isReadOnly && (
-        <div className="rounded-lg bg-green-50 p-4 text-center">
-          <p className="text-green-800 font-medium">✓ Check-In enviado exitosamente</p>
+          <h1 className="text-2xl font-semibold text-gray-900">Check-In Semanal</h1>
+          <p className="text-sm text-secondary">Semana del {checkin.week_start}</p>
           {checkin.submitted_at && (
-            <p className="text-green-600 text-sm mt-1">
-              Enviado el {new Date(checkin.submitted_at).toLocaleDateString("es")}
+            <p className="text-xs text-secondary mt-1">
+              Enviado el {new Date(checkin.submitted_at).toLocaleDateString("es", { day: "numeric", month: "short", year: "numeric" })}
             </p>
           )}
+        </div>
+        {isLocked ? (
+          <Badge variant="warning">Bloqueado 🔒</Badge>
+        ) : (
+          <Badge variant="success">Enviado</Badge>
+        )}
+      </header>
+
+      {isLocked && <CheckInLockedBanner />}
+
+      {/* Existing priorities from backend */}
+      <div className="space-y-3">
+        {(checkin.priorities ?? []).map((priority) => (
+          <CheckInPriorityCard
+            key={priority.id}
+            priority={priority}
+            checkinId={checkin.id}
+            editable={isEditable}
+          />
+        ))}
+      </div>
+
+      {/* Add priority form (expandable) */}
+      {isEditable && (
+        <div className="space-y-3">
+          {showAddForm ? (
+            <PriorityForm checkinId={checkin.id} phases={MOCK_PHASES} onPriorityCreated={handlePriorityCreated} />
+          ) : (
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="w-full rounded-lg border border-dashed border-border p-3 text-sm text-secondary hover:border-primary hover:text-primary transition-colors"
+            >
+              + Agregar Prioridad
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Re-submit button */}
+      {isEditable && (
+        <div className="flex justify-end pt-4 border-t border-border">
+          <ResubmitButton checkinId={checkin.id} newPrioritiesCount={newPrioritiesCount} />
         </div>
       )}
     </div>
