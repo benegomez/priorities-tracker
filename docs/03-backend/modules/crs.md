@@ -1,87 +1,92 @@
 
 # CRS Module
 
+## Estado: ✅ Implementado (US-007)
+
 ## Objetivo
 
-Implementar el Commitment Reliability Score (CRS).
+Implementar el Commitment Reliability Score (CRS) — principal diferenciador estratégico de Priorities Tracker.
 
-Es el principal diferenciador estratégico de Priorities Tracker.
-
----
-
-# Definición
-
-El CRS mide la confiabilidad de una persona para cumplir los compromisos que ella misma definió.
+Mide la confiabilidad de una persona para cumplir los compromisos que ella misma definió.
 
 ---
 
-# Factores Evaluados
+## Fórmula v1.0 (Implementada)
 
-## Prioridades
+```
+CRS = (0.40 × priority_completion_rate)
+    + (0.30 × task_completion_rate)
+    + (0.20 × historical_consistency)
+    + (0.10 × carryover_penalty)
+```
 
-- Comprometidas
-- Completadas
+Sin historial previo, se re-pondera:
+- 50% prioridades, 37.5% tareas, 12.5% carry-over
 
-## Tareas
+### Escala
 
-- Comprometidas
-- Completadas
+| Rango | Nivel | Risk Level |
+|---|---|---|
+| 75–100 | Confiable/Excelente | `low` |
+| 60–74 | Riesgo moderado | `moderate` |
+| 0–59 | Riesgo alto | `high` |
 
-## Continuidad
+### Tendencia
 
-- Arrastres
-- Frecuencia de arrastre
-
-## Consistencia
-
-- Semanas consecutivas
-- Tendencia histórica
-
----
-
-# Entidad Principal
-
-CommitmentReliabilityScore
-
-## Atributos
-
-- employee_id
-- week_id
-- score
-- trend
-- calculated_at
+- `improving` — score > promedio histórico + 5
+- `declining` — score < promedio histórico - 5
+- `stable` — dentro de ±5 del promedio
 
 ---
 
-# Casos de Uso
+## Endpoints Implementados
 
-- CalculateCRSUseCase
-- RecalculateCRSUseCase
-- GenerateTeamCRSUseCase
-- GenerateProjectCRSUseCase
-- GeneratePhaseCRSUseCase
-
----
-
-# Reportes
-
-- CRS Individual
-- CRS Equipo
-- CRS Proyecto
-- CRS Fase
+| Método | Path | Descripción |
+|---|---|---|
+| GET | `/api/v1/crs/current` | Score actual del empleado autenticado |
+| GET | `/api/v1/crs/history` | Historial de scores (últimas N semanas) |
 
 ---
 
-# Reglas
+## Trigger de Cálculo
 
-- CRS siempre deriva de Check-In y Check-Out.
-- No puede modificarse manualmente.
-- Debe ser auditable.
+El CRS se calcula automáticamente al ejecutar `SubmitCheckOutUseCase`. Es best-effort: si falla el cálculo, el checkout permanece submitted (no se revierte).
 
 ---
 
-# Evolución Futura
+## Estructura del Módulo
 
-- Predicción de riesgo.
-- Team Reliability Index.
-- Benchmarks organizacionales.
+```
+modules/crs/
+├── api/
+│   ├── router.py
+│   └── schemas.py
+├── application/
+│   └── services/
+│       └── crs_calculator.py
+├── domain/
+│   └── entities.py
+├── infrastructure/
+│   └── repository.py
+└── tests/
+    └── unit/
+        └── test_crs_calculator.py  (17 tests)
+```
+
+---
+
+## Reglas de Negocio
+
+- **BR-009** — CRS se calcula automáticamente al hacer Check-Out
+- **BR-010** — CRS no puede modificarse manualmente
+- **BR-011** — Toda ejecución de CRS debe ser auditable (`formula_version` almacenado)
+- **BR-012** — CRS se recalcula cuando existe Check-Out
+
+---
+
+## Evolución Futura
+
+- Team CRS aggregation (GenerateTeamCRSUseCase)
+- Project/Phase CRS
+- Predicción de riesgo
+- Benchmarks organizacionales

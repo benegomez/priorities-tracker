@@ -67,11 +67,12 @@ Project Management
 
 Layer	Artifact
 Product Feature	Project Management
-User Story	Manage Projects
-Use Case	Project Administration
-Domain Entity	Project
-Database Table	projects
-API Schema	ProjectCreate, ProjectUpdate, ProjectResponse
+User Story	US-006 Project & Phase Management
+Use Case	CreateProject, UpdateProject, UpdateProjectStatus, AddMember, RemoveMember
+Domain Entity	Project, ProjectMember
+Database Table	projects, project_members
+API Schema	ProjectCreate, ProjectUpdate, ProjectResponse, ProjectMemberResponse
+Implementation	✅ Implemented (PR #6)
 
 ⸻
 
@@ -79,11 +80,12 @@ Phase Management
 
 Layer	Artifact
 Product Feature	Project Phases
-User Story	Manage Phases
-Use Case	Phase Administration
+User Story	US-006 Project & Phase Management
+Use Case	CreatePhase, UpdatePhase, UpdatePhaseStatus, GetAvailablePhases
 Domain Entity	ProjectPhase
 Database Table	project_phases
 API Schema	PhaseCreate, PhaseUpdate, PhaseResponse
+Implementation	✅ Implemented (PR #6)
 
 ⸻
 
@@ -215,11 +217,12 @@ Commitment Reliability Score (CRS)
 
 Layer	Artifact
 Product Feature	CRS
-User Story	Review Reliability
-Use Case	Reliability Evaluation
-Domain Entity	CRS Aggregate
-Database Tables	crs_history, crs_snapshots
-API Schemas	CRSResponse
+User Story	US-007 CRS Calculation & Dashboard
+Use Case	CalculateCRS (triggered by CheckOut submit), GetCurrentCRS, GetCRSHistory
+Domain Entity	CommitmentReliabilityScore
+Database Tables	crs_scores
+API Schemas	CRSScoreResponse, CRSHistoryResponse
+Implementation	✅ Implemented (US-007)
 
 ⸻
 
@@ -308,4 +311,4 @@ Every MVP capability is represented throughout the architecture stack, ensuring 
 
 Project Status:
 
-IN PROGRESS — US-001 (Check-In) and US-002 (Auth) implemented.
+IN PROGRESS — US-001 (Check-In), US-002 (Auth), US-003 (Check-Out), US-004 (Design System), US-005 (Check-In Detail), US-006 (Projects), US-007 (CRS) implemented.

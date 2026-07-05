@@ -1,7 +1,8 @@
 "use client";
 
 import { useMarkPriority } from "../hooks/useMarkPriority";
-import { CheckOutTaskItem } from "./CheckOutTaskItem";
+import { useMarkTask } from "../hooks/useMarkTask";
+import { useQueryClient } from "@tanstack/react-query";
 import type { CheckOutPriorityItem } from "../services/checkout-service";
 
 interface CheckOutPriorityCardProps {
@@ -17,10 +18,44 @@ const levelColors: Record<string, string> = {
 };
 
 export function CheckOutPriorityCard({ checkoutId, priority, readOnly = false }: CheckOutPriorityCardProps) {
-  const { mutate } = useMarkPriority();
+  const markPriority = useMarkPriority();
+  const markTask = useMarkTask();
+  const queryClient = useQueryClient();
 
-  function handleToggle() {
-    mutate({ checkoutId, priorityId: priority.id, completed: !priority.completed });
+  function handlePriorityToggle() {
+    const newCompleted = !priority.completed;
+    // Mark priority
+    markPriority.mutate({ checkoutId, priorityId: priority.id, completed: newCompleted });
+    // Cascade: mark all tasks the same
+    if (priority.tasks.length > 0) {
+      priority.tasks.forEach((task) => {
+        if (task.completed !== newCompleted) {
+          markTask.mutate({ checkoutId, taskId: task.id, completed: newCompleted });
+        }
+      });
+    }
+  }
+
+  function handleTaskToggle(taskId: string, currentCompleted: boolean) {
+    const newTaskCompleted = !currentCompleted;
+    markTask.mutate(
+      { checkoutId, taskId, completed: newTaskCompleted },
+      {
+        onSuccess: () => {
+          // After marking task, check if all tasks are now completed
+          const otherTasks = priority.tasks.filter((t) => t.id !== taskId);
+          const allOthersCompleted = otherTasks.every((t) => t.completed);
+
+          if (newTaskCompleted && allOthersCompleted && !priority.completed) {
+            // All tasks completed → auto-mark priority
+            markPriority.mutate({ checkoutId, priorityId: priority.id, completed: true });
+          } else if (!newTaskCompleted && priority.completed) {
+            // A task was unchecked → unmark priority
+            markPriority.mutate({ checkoutId, priorityId: priority.id, completed: false });
+          }
+        },
+      }
+    );
   }
 
   return (
@@ -30,7 +65,7 @@ export function CheckOutPriorityCard({ checkoutId, priority, readOnly = false }:
           <input
             type="checkbox"
             checked={priority.completed}
-            onChange={handleToggle}
+            onChange={handlePriorityToggle}
             className="h-5 w-5 rounded border-border text-primary focus:ring-primary"
             aria-label={`Marcar "${priority.title}" como completada`}
           />
@@ -49,12 +84,20 @@ export function CheckOutPriorityCard({ checkoutId, priority, readOnly = false }:
       {priority.tasks.length > 0 && (
         <div className="mt-2 border-t border-border pt-2">
           {priority.tasks.map((task) => (
-            <CheckOutTaskItem
-              key={task.id}
-              checkoutId={checkoutId}
-              task={task}
-              readOnly={readOnly}
-            />
+            <div key={task.id} className="flex items-center gap-2 py-1 pl-8">
+              {!readOnly && (
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={() => handleTaskToggle(task.id, task.completed)}
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                  aria-label={`Marcar tarea "${task.title}" como completada`}
+                />
+              )}
+              <span className={task.completed ? "line-through text-secondary text-sm" : "text-sm"}>
+                {task.title}
+              </span>
+            </div>
           ))}
         </div>
       )}

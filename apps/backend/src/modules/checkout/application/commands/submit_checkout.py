@@ -124,8 +124,20 @@ class SubmitCheckOutUseCase:
 
         # CRS calculation (best-effort)
         try:
-            logger.info("CRS calculation triggered for employee=%s week=%s", command.employee_id, checkout.week_start)
-            # TODO: invoke CRS module when implemented
+            from src.modules.crs.application.services.crs_calculator import CRSCalculationService
+            from src.modules.crs.infrastructure.repositories.crs_repository_impl import CRSRepositoryImpl
+            crs_service = CRSCalculationService(crs_repo=CRSRepositoryImpl(self._session))
+            await crs_service.calculate(
+                employee_id=command.employee_id,
+                organization_id=command.organization_id,
+                checkout_id=checkout.id,
+                week_start=checkout.week_start,
+                priorities_total=summary.priorities_total,
+                priorities_completed=summary.priorities_completed,
+                priorities_carried=summary.priorities_carried,
+                tasks_total=summary.tasks_total,
+                tasks_completed=summary.tasks_completed,
+            )
         except Exception as e:
             logger.warning("CRS calculation failed (best-effort): %s", e)
 

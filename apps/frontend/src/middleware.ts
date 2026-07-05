@@ -32,7 +32,7 @@ export function middleware(request: NextRequest) {
     if (pathname.startsWith("/manager") && !["manager", "administrator"].includes(role)) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
-    if (pathname.startsWith("/employee") && !["employee", "administrator"].includes(role)) {
+    if (pathname.startsWith("/employee") && !["employee", "manager", "administrator"].includes(role)) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
   }

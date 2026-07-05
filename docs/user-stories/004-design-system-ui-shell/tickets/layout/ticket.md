@@ -1,5 +1,5 @@
 ---
-status: todo
+status: done
 type: frontend
 story: docs/user-stories/004-design-system-ui-shell/UserStory.md
 depends-on: tickets/foundations/ticket.md
