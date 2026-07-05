@@ -21,6 +21,7 @@ class CheckInResponse(BaseModel):
             "week_start": "2025-01-06",
             "status": "draft",
             "submitted_at": None,
+            "priorities_count": 2,
             "created_at": "2025-01-06T08:00:00Z",
             "updated_at": "2025-01-06T08:00:00Z",
         }
@@ -32,6 +33,7 @@ class CheckInResponse(BaseModel):
     week_start: date
     status: str
     submitted_at: datetime | None = None
+    priorities_count: int = 0
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

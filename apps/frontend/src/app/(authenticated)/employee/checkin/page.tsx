@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useCurrentCheckIn } from "@/features/checkins/hooks/useCurrentCheckIn";
 import { CheckInForm } from "@/features/checkins/components/CheckInForm";
 import { CheckInStatus } from "@/features/checkins/components/CheckInStatus";
@@ -11,11 +12,26 @@ import type { PriorityResponse } from "@/features/priorities/services/priority-s
 
 // TODO: Fetch from API when projects module has list endpoint
 const MOCK_PHASES = [
-  { id: "44444444-4444-4444-4444-444444444444", name: "Fase 1 - Descubrimiento", project_name: "Proyecto Demo" },
+  { id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", name: "Descubrimiento", project_name: "Proyecto Alpha" },
+  { id: "cccccccc-cccc-cccc-cccc-cccccccccccc", name: "Desarrollo", project_name: "Proyecto Alpha" },
+  { id: "dddddddd-dddd-dddd-dddd-dddddddddddd", name: "Pruebas", project_name: "Proyecto Alpha" },
 ];
 
 export default function CheckInPage() {
   const { data: checkin, isLoading, error } = useCurrentCheckIn();
+  const [priorities, setPriorities] = useState<PriorityResponse[]>([]);
+
+  function handlePriorityCreated(priority: PriorityResponse) {
+    setPriorities((prev) => [...prev, { ...priority, tasks: priority.tasks ?? [] }]);
+  }
+
+  function handleTaskCreated(priorityId: string, task: { id: string; priority_id: string; title: string; description: string | null; status: "pending" | "in_progress" | "completed" | "cancelled"; created_at: string; updated_at: string }) {
+    setPriorities((prev) =>
+      prev.map((p) =>
+        p.id === priorityId ? { ...p, tasks: [...p.tasks, task] } : p
+      )
+    );
+  }
 
   if (isLoading) {
     return (
@@ -45,11 +61,10 @@ export default function CheckInPage() {
   }
 
   const isReadOnly = checkin.status !== "draft";
-  // Priorities come embedded in the check-in response from the current endpoint
-  const priorities: PriorityResponse[] = (checkin as unknown as { priorities?: PriorityResponse[] }).priorities ?? [];
+  const totalPriorities = (checkin.priorities_count ?? 0) + priorities.length;
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
+    <div className="space-y-6">
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Check-In Semanal</h1>
@@ -58,13 +73,13 @@ export default function CheckInPage() {
         <CheckInStatus status={checkin.status} />
       </header>
 
-      <PriorityList priorities={priorities} checkinId={checkin.id} readOnly={isReadOnly} />
+      <PriorityList priorities={priorities} checkinId={checkin.id} readOnly={isReadOnly} onTaskCreated={handleTaskCreated} />
 
       {!isReadOnly && (
         <>
-          <PriorityForm checkinId={checkin.id} phases={MOCK_PHASES} />
+          <PriorityForm checkinId={checkin.id} phases={MOCK_PHASES} onPriorityCreated={handlePriorityCreated} />
           <div className="flex justify-end pt-4 border-t">
-            <SubmitCheckInButton checkinId={checkin.id} prioritiesCount={checkin.priorities_count} />
+            <SubmitCheckInButton checkinId={checkin.id} prioritiesCount={totalPriorities} />
           </div>
         </>
       )}

@@ -39,6 +39,9 @@ async def get_current_checkin(
     if checkin is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No check-in for current week")
 
+    priority_repo = PriorityRepositoryImpl(session)
+    priorities_count = await priority_repo.count_by_checkin(checkin.id, current_user.organization_id)
+
     return CheckInResponse(
         id=checkin.id,
         employee_id=checkin.employee_id,
@@ -46,6 +49,7 @@ async def get_current_checkin(
         week_start=checkin.week_start,
         status=checkin.status,
         submitted_at=checkin.submitted_at,
+        priorities_count=priorities_count,
         created_at=checkin.created_at,
         updated_at=checkin.updated_at,
     )
@@ -90,6 +94,7 @@ async def create_checkin(
         week_start=checkin.week_start,
         status=checkin.status,
         submitted_at=checkin.submitted_at,
+        priorities_count=0,
         created_at=checkin.created_at,
         updated_at=checkin.updated_at,
     )

@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { useCreateTask } from "../hooks/useCreateTask";
+import type { TaskResponse } from "../services/priority-service";
 
 interface TaskFormProps {
   priorityId: string;
   checkinId: string;
+  onTaskCreated?: (task: TaskResponse) => void;
 }
 
-export function TaskForm({ priorityId, checkinId }: TaskFormProps) {
+export function TaskForm({ priorityId, checkinId, onTaskCreated }: TaskFormProps) {
   const [title, setTitle] = useState("");
   const { mutate, isPending } = useCreateTask(checkinId);
 
@@ -17,7 +19,7 @@ export function TaskForm({ priorityId, checkinId }: TaskFormProps) {
     if (!title.trim()) return;
     mutate(
       { priorityId, data: { title: title.trim() } },
-      { onSuccess: () => setTitle("") }
+      { onSuccess: (data) => { setTitle(""); onTaskCreated?.(data as unknown as TaskResponse); } }
     );
   }
 

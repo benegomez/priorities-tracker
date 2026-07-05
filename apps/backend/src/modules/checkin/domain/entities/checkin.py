@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from uuid import UUID
 
+from src.shared.config.settings import settings
 from src.shared.exceptions.base import BusinessRuleViolation, ValidationException
 
 
@@ -22,6 +23,8 @@ class WeeklyCheckIn:
         self._validate_week_start()
 
     def _validate_week_start(self) -> None:
+        if settings.is_development:
+            return
         if self.week_start.weekday() != 0:
             raise ValidationException("week_start must be a Monday (ISO weekday 0)")
 

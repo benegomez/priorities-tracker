@@ -3,8 +3,13 @@
 import { useCreateCheckIn } from "../hooks/useCreateCheckIn";
 import type { ApiError } from "@/lib/api-client";
 
-function getCurrentMonday(): string {
+function getCurrentWeekStart(): string {
   const now = new Date();
+  // In development, use today's date to allow testing any day
+  // In production, always calculate the Monday of the current week
+  if (process.env.NODE_ENV === "development") {
+    return now.toISOString().split("T")[0];
+  }
   const day = now.getDay();
   const diff = day === 0 ? -6 : 1 - day;
   const monday = new Date(now);
@@ -16,7 +21,7 @@ export function CheckInForm() {
   const { mutate, isPending, error } = useCreateCheckIn();
 
   function handleCreate() {
-    mutate(getCurrentMonday());
+    mutate(getCurrentWeekStart());
   }
 
   const apiError = error as ApiError | null;
