@@ -23,7 +23,7 @@ export function getCurrentCheckIn(): Promise<CheckInResponse> {
 }
 
 export function createCheckIn(weekStart: string): Promise<CheckInResponse> {
-  return apiPost<CheckInResponse>("/api/v1/checkins", { week_start: weekStart });
+  return apiPost<CheckInResponse>("/api/v1/checkins/", { week_start: weekStart });
 }
 
 export function submitCheckIn(id: string): Promise<CheckInSubmitResponse> {

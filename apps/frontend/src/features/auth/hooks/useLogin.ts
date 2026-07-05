@@ -20,6 +20,10 @@ export function useLogin() {
       setTokens(tokens.access_token, tokens.refresh_token);
       setUser(user);
 
+      // Set cookies for Next.js middleware (route protection)
+      document.cookie = `access_token=${tokens.access_token}; path=/; max-age=${tokens.expires_in}`;
+      document.cookie = `user_role=${user.role}; path=/; max-age=${tokens.expires_in}`;
+
       const redirectMap = {
         employee: "/employee/dashboard",
         manager: "/manager/dashboard",

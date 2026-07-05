@@ -1,6 +1,6 @@
 "use client";
 
-import type { PriorityResponse } from "../services/priority-service";
+import type { PriorityResponse, TaskResponse } from "../services/priority-service";
 import { TaskList } from "./TaskList";
 import { TaskForm } from "./TaskForm";
 
@@ -8,6 +8,7 @@ interface PriorityCardProps {
   priority: PriorityResponse;
   checkinId: string;
   readOnly?: boolean;
+  onTaskCreated?: (priorityId: string, task: TaskResponse) => void;
 }
 
 const levelColors = {
@@ -16,7 +17,7 @@ const levelColors = {
   low: "bg-blue-100 text-blue-800",
 };
 
-export function PriorityCard({ priority, checkinId, readOnly = false }: PriorityCardProps) {
+export function PriorityCard({ priority, checkinId, readOnly = false, onTaskCreated }: PriorityCardProps) {
   return (
     <div className="rounded-lg border p-4 shadow-sm">
       <div className="flex items-center justify-between">
@@ -34,7 +35,7 @@ export function PriorityCard({ priority, checkinId, readOnly = false }: Priority
         <p className="mt-1 text-sm text-gray-600">{priority.description}</p>
       )}
       <TaskList tasks={priority.tasks} />
-      {!readOnly && <TaskForm priorityId={priority.id} checkinId={checkinId} />}
+      {!readOnly && <TaskForm priorityId={priority.id} checkinId={checkinId} onTaskCreated={(task) => onTaskCreated?.(priority.id, task)} />}
     </div>
   );
 }

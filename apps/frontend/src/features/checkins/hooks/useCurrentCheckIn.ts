@@ -8,7 +8,7 @@ export function useCurrentCheckIn() {
   return useQuery({
     queryKey: ["checkins", "current"],
     queryFn: getCurrentCheckIn,
-    retry: (failureCount, error) => {
+    retry: (failureCount, error: unknown) => {
       if ((error as ApiError).status === 404) return false;
       return failureCount < 2;
     },

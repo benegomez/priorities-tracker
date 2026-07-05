@@ -17,6 +17,9 @@ export function useLogout() {
     },
     onSettled: () => {
       clearUser();
+      // Clear cookies used by Next.js middleware
+      document.cookie = "access_token=; path=/; max-age=0";
+      document.cookie = "user_role=; path=/; max-age=0";
       router.push("/auth/login");
     },
   });

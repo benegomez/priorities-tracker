@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { useCreatePriority } from "../hooks/useCreatePriority";
 import type { ApiError } from "@/lib/api-client";
+import type { PriorityResponse } from "../services/priority-service";
 
 interface PriorityFormProps {
   checkinId: string;
   phases: { id: string; name: string; project_name: string }[];
+  onPriorityCreated?: (priority: PriorityResponse) => void;
 }
 
-export function PriorityForm({ checkinId, phases }: PriorityFormProps) {
+export function PriorityForm({ checkinId, phases, onPriorityCreated }: PriorityFormProps) {
   const [phaseId, setPhaseId] = useState("");
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState<"low" | "medium" | "high">("medium");
@@ -28,9 +30,10 @@ export function PriorityForm({ checkinId, phases }: PriorityFormProps) {
         priority_level: level,
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           setTitle("");
           setDescription("");
+          onPriorityCreated?.(data as unknown as PriorityResponse);
         },
       }
     );

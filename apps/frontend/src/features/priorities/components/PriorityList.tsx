@@ -1,15 +1,16 @@
 "use client";
 
-import type { PriorityResponse } from "../services/priority-service";
+import type { PriorityResponse, TaskResponse } from "../services/priority-service";
 import { PriorityCard } from "./PriorityCard";
 
 interface PriorityListProps {
   priorities: PriorityResponse[];
   checkinId: string;
   readOnly?: boolean;
+  onTaskCreated?: (priorityId: string, task: TaskResponse) => void;
 }
 
-export function PriorityList({ priorities, checkinId, readOnly = false }: PriorityListProps) {
+export function PriorityList({ priorities, checkinId, readOnly = false, onTaskCreated }: PriorityListProps) {
   if (priorities.length === 0) {
     return <p className="text-gray-500 text-sm py-4">No hay prioridades aún. Agrega tu primera prioridad.</p>;
   }
@@ -22,6 +23,7 @@ export function PriorityList({ priorities, checkinId, readOnly = false }: Priori
           priority={priority}
           checkinId={checkinId}
           readOnly={readOnly}
+          onTaskCreated={onTaskCreated}
         />
       ))}
     </div>
