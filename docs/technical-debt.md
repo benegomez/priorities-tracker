@@ -91,6 +91,70 @@
 
 ---
 
+### TD-005 — Contract tests (schemathesis) para checkin y priorities
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-005 |
+| **Estado** | `open` |
+| **Prioridad** | P2 |
+| **Módulo** | `checkin`, `priorities` |
+| **Origen** | US-001 `feature/001-weekly-checkin-creation` |
+| **Descripción** | Los 5 endpoints de checkin/priorities no tienen contract tests con `schemathesis`. La validación del contrato se hace implícitamente por los integration tests pero no de forma formal contra el spec OpenAPI. |
+| **Causa raíz** | `schemathesis` no está instalado ni configurado en el proyecto. Se difirió junto con TD-002. |
+| **Criterio de cierre** | Agregar `schemathesis` a `requirements.txt`, crear `tests/contract/test_checkin_contract.py` y `test_priorities_contract.py` con los 5 endpoints. |
+| **Cuándo cerrar** | Al resolver TD-002 (mismo esfuerzo — configurar schemathesis una vez cubre ambos). |
+
+---
+
+### TD-006 — E2E tests (Playwright) para flujo de Check-In
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-006 |
+| **Estado** | `open` |
+| **Prioridad** | P2 |
+| **Módulo** | `checkin` (frontend + backend) |
+| **Origen** | US-001 `feature/001-weekly-checkin-creation` |
+| **Descripción** | Los 3 escenarios E2E del flujo de check-in (happy path, unauthenticated redirect, submitted read-only) no están automatizados. |
+| **Causa raíz** | Playwright no está configurado en el proyecto. Misma causa que TD-004. |
+| **Criterio de cierre** | Configurar Playwright, crear `tests/e2e/test_checkin_flow.spec.ts` con los 3 escenarios. Agregar `data-testid` a los componentes del flujo. |
+| **Cuándo cerrar** | Al resolver TD-004 (configurar Playwright una vez cubre ambos flujos). |
+
+---
+
+### TD-007 — PriorityForm usa fases hardcodeadas (mock)
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-007 |
+| **Estado** | `open` |
+| **Prioridad** | P1 |
+| **Módulo** | `priorities` (frontend) |
+| **Origen** | US-001 `feature/001-weekly-checkin-creation` |
+| **Descripción** | La página `/employee/checkin` tiene un array `MOCK_PHASES` hardcodeado con un solo UUID de fase. El `PriorityForm` necesita consumir un endpoint real que liste proyectos y fases disponibles para el usuario. |
+| **Causa raíz** | El módulo `projects` no tiene endpoints de lectura implementados aún. Se usó un mock para no bloquear la entrega de US-001. |
+| **Criterio de cierre** | Implementar `GET /api/v1/projects` y `GET /api/v1/projects/{id}/phases` (o un endpoint combinado), crear hook `useAvailablePhases()`, y reemplazar `MOCK_PHASES` por datos reales. |
+| **Cuándo cerrar** | En la primera US que implemente el módulo `projects` o antes del primer deploy a staging. |
+
+---
+
+### TD-008 — Security tests pendientes para checkin/priorities
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-008 |
+| **Estado** | `open` |
+| **Prioridad** | P2 |
+| **Módulo** | `checkin`, `priorities` |
+| **Origen** | US-001 `feature/001-weekly-checkin-creation` |
+| **Descripción** | Faltan tests explícitos de seguridad: cross-tenant access (fase de otra org), acceso a checkin de otro empleado, y validación de 401 sin token en todos los endpoints. La lógica está implementada pero no tiene tests dedicados. |
+| **Causa raíz** | Se priorizó la cobertura funcional (24 tests BE) sobre los tests de seguridad dedicados. |
+| **Criterio de cierre** | Crear `tests/security/test_checkin_security.py` con al menos: `test_cross_tenant_phase_returns_403`, `test_other_employee_checkin_returns_403`, `test_all_endpoints_return_401_without_token`. |
+| **Cuándo cerrar** | Antes del primer deploy a staging o en la próxima US que toque `checkin`/`priorities`. |
+
+---
+
 ## Deuda Cerrada
 
 | ID | Descripción | Cerrada en | PR |
@@ -103,4 +167,5 @@
 
 | Fecha | Acción | US |
 |---|---|---|
+| 2025-06-23 | Registro: TD-005, TD-006, TD-007, TD-008 | US-001 |
 | 2026-06-23 | Registro inicial: TD-001, TD-002, TD-003, TD-004 | US-002 |
