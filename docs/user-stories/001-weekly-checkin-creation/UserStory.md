@@ -3,8 +3,9 @@ id: 001-weekly-checkin-creation
 persona: Colaborador Individual
 fr: FR-014, FR-015, FR-016
 bounded-context: Commitment
-status: draft
+status: enriched
 created: 2025-01-06
+enriched: 2025-01-06
 ---
 
 # US-001: Weekly Check-In Creation
@@ -309,6 +310,88 @@ Módulo `checkin` es siempre Critical por definición (testing-standards.md). Es
 | Business Rules | BR-001, BR-003, BR-004, BR-005, BR-013, BR-016, BR-017 (7 reglas) |
 | Tests requeridos | Critical: Unit + Integration + Contract + E2E + Security, cobertura >95% |
 | Justificación | Múltiples entidades nuevas con state machine, 7 BRs, E2E obligatorio por ser flujo Critical, y es prerequisito de toda la cadena de valor |
+
+---
+
+### Data Model (Tablas Involucradas)
+
+**check_ins** *(nueva)*
+```sql
+CREATE TABLE check_ins (
+    id              UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID         NOT NULL REFERENCES organizations(id),
+    employee_id     UUID         NOT NULL REFERENCES users(id),
+    week_period     DATE         NOT NULL,           -- lunes ISO de la semana
+    status          VARCHAR(20)  NOT NULL DEFAULT 'draft',
+    submitted_at    TIMESTAMPTZ  NULL,
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    deleted_at      TIMESTAMPTZ  NULL,
+    deleted_by      UUID         NULL,
+    CONSTRAINT uq_check_ins_employee_week UNIQUE (employee_id, week_period),
+    CONSTRAINT ck_check_ins_status CHECK (status IN ('draft','submitted','closed'))
+);
+CREATE INDEX idx_check_ins_organization_id ON check_ins (organization_id);
+CREATE INDEX idx_check_ins_employee_id     ON check_ins (employee_id);
+```
+
+**priorities** *(nueva — scope de esta US: draft + planned)*
+```sql
+CREATE TABLE priorities (
+    id              UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID         NOT NULL REFERENCES organizations(id),
+    check_in_id     UUID         NOT NULL REFERENCES check_ins(id),
+    phase_id        UUID         NOT NULL REFERENCES project_phases(id),
+    owner_id        UUID         NOT NULL REFERENCES users(id),
+    week_period     DATE         NOT NULL,
+    title           VARCHAR(300) NOT NULL,
+    description     TEXT         NULL,
+    priority_level  VARCHAR(10)  NOT NULL DEFAULT 'medium',
+    status          VARCHAR(20)  NOT NULL DEFAULT 'draft',
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    deleted_at      TIMESTAMPTZ  NULL,
+    deleted_by      UUID         NULL,
+    CONSTRAINT ck_priorities_level  CHECK (priority_level IN ('low','medium','high')),
+    CONSTRAINT ck_priorities_status CHECK (status IN ('draft','planned','in_progress','completed','carried_over'))
+);
+CREATE INDEX idx_priorities_organization_id ON priorities (organization_id);
+CREATE INDEX idx_priorities_check_in_id     ON priorities (check_in_id);
+CREATE INDEX idx_priorities_phase_id        ON priorities (phase_id);
+CREATE INDEX idx_priorities_owner_id        ON priorities (owner_id);
+```
+
+**tasks** *(nueva)*
+```sql
+CREATE TABLE tasks (
+    id              UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id UUID         NOT NULL REFERENCES organizations(id),
+    priority_id     UUID         NOT NULL REFERENCES priorities(id),
+    title           VARCHAR(300) NOT NULL,
+    description     TEXT         NULL,
+    status          VARCHAR(20)  NOT NULL DEFAULT 'pending',
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    deleted_at      TIMESTAMPTZ  NULL,
+    deleted_by      UUID         NULL,
+    CONSTRAINT ck_tasks_status CHECK (status IN ('pending','in_progress','completed','cancelled'))
+);
+CREATE INDEX idx_tasks_organization_id ON tasks (organization_id);
+CREATE INDEX idx_tasks_priority_id     ON tasks (priority_id);
+```
+
+> **Nota naming:** La API expone `week_start` (legible para el cliente); internamente la columna se llama `week_period`. El valor siempre es el lunes ISO de la semana (`YYYY-MM-DD`).
+
+---
+
+### Open Questions / Decisiones Pendientes
+
+| # | Pregunta | Decisión ||
+|---|---|---|---|
+| OQ-1 | ¿Puede un `manager` crear un Check-In en nombre de un empleado? | No — solo el propio `employee` puede crear su Check-In. Un manager puede consultarlo. | ADR-010 / BR-013 |
+| OQ-2 | ¿Se permite crear prioridades sin Check-In explícito (floating)? | No — toda prioridad de esta US debe tener `check_in_id`. Prioridades sin checkin son out-of-scope. | BR-003 |
+| OQ-3 | ¿Cuántas prioridades máximas por Check-In? | Sin límite duro en MVP. Candidato a BR futuro. | — |
+| OQ-4 | ¿Qué pasa si el proyecto de la fase es desactivado después de crear la prioridad? | La prioridad permanece válida; se valida el estado del proyecto solo en el momento de creación. | — |
 
 ---
 
