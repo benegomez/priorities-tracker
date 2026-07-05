@@ -37,8 +37,14 @@ export function LoginForm() {
 
   const errorMessage = getErrorMessage();
 
+  function handleFormSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+    handleSubmit(onSubmit)(e);
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+    <form onSubmit={handleFormSubmit} action="javascript:void(0)" noValidate className="space-y-4">
       <div className="space-y-1.5">
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
           Email

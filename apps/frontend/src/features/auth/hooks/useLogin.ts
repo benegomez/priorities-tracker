@@ -30,7 +30,8 @@ export function useLogin() {
         administrator: "/admin/dashboard",
       } as const;
 
-      router.push(redirectMap[user.role]);
+      // Use window.location for hard navigation so middleware sees the new cookies
+      window.location.href = redirectMap[user.role];
     },
   });
 }

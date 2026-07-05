@@ -19,9 +19,10 @@ describe("navigation config", () => {
     const nav = getNavigationForRole("employee");
     expect(nav).toHaveLength(3);
     expect(nav[0].title).toBe("Mi Semana");
-    expect(nav[0].items).toHaveLength(2);
+    expect(nav[0].items).toHaveLength(3);
     expect(nav[0].items[0].label).toBe("Check-In");
     expect(nav[0].items[0].href).toBe("/employee/checkin");
+    expect(nav[0].items[1].label).toBe("Check-Out");
   });
 
   it("returns correct items for manager", () => {
