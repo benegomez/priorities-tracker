@@ -1,5 +1,5 @@
 ---
-status: todo
+status: done
 type: frontend
 story: docs/user-stories/005-checkin-detail-edit/UserStory.md
 depends-on: tickets/backend/ticket.md

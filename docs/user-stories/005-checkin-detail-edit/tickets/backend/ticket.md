@@ -1,5 +1,5 @@
 ---
-status: todo
+status: done
 type: backend
 story: docs/user-stories/005-checkin-detail-edit/UserStory.md
 depends-on: null

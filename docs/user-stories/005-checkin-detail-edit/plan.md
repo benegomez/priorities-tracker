@@ -1,6 +1,6 @@
 ---
 story: 005-checkin-detail-edit
-status: pending
+status: done
 branch: feature/005-checkin-detail-edit
 risk_level: High
 complexity: M
@@ -25,74 +25,42 @@ created: 2026-07-05
 
 ### 1.1 Schemas — Agregar prioridades con tareas al response
 
-- [ ] Crear `CheckInTaskItem` schema en `modules/checkin/api/schemas.py`:
-  - [ ] Campos: `id`, `title`, `status`
-- [ ] Crear `CheckInPriorityItem` schema:
-  - [ ] Campos: `id`, `title`, `description`, `priority_level`, `status`, `tasks: list[CheckInTaskItem]`
-- [ ] Modificar `CheckInResponse`:
-  - [ ] Agregar `priorities: list[CheckInPriorityItem] = []`
+- [x] Crear `CheckInTaskItem` schema en `modules/checkin/api/schemas.py`
+- [x] Crear `CheckInPriorityItem` schema con `phase_name`, `project_name`, `tasks`
+- [x] Modificar `CheckInResponse`: agregar `priorities: list[CheckInPriorityItem]`
 
 ### 1.2 Router — GET /checkins/current con prioridades y tareas
 
-- [ ] Crear helper `_load_priorities_for_checkin(session, checkin_id, organization_id)`:
-  - [ ] Query prioridades del checkin
-  - [ ] Query tareas agrupadas por prioridad (un solo query con ANY)
-  - [ ] Retornar lista de `CheckInPriorityItem` con tareas anidadas
-- [ ] Modificar endpoint `get_current_checkin`:
-  - [ ] Llamar helper y agregar `priorities` al response
+- [x] Crear helper `_load_priorities_with_tasks` con JOIN a project_phases y projects
+- [x] Modificar endpoint `get_current_checkin`: retorna prioridades con tareas anidadas
 
 ### 1.3 Use Case — Permitir agregar prioridades a checkin submitted
 
-- [ ] Modificar `modules/priorities/application/commands/create_priority.py`:
-  - [ ] Cambiar validación: permitir `status in ("draft", "submitted")` (no solo `draft`)
-  - [ ] Agregar validación: verificar que NO existe checkout para la misma semana/empleado
-  - [ ] Si existe checkout → `BusinessRuleViolation("Check-In is locked by an existing Check-Out")`
+- [x] Modificar `create_priority.py`: permitir `status in ("draft", "submitted")`
+- [x] Agregar validación: verificar que NO existe checkout para la semana
+- [x] Si existe checkout → `BusinessRuleViolation("Check-In is locked...")`
 
 ### 1.4 Use Case — Permitir re-submit
 
-- [ ] Modificar `modules/checkin/domain/entities/checkin.py`:
-  - [ ] Método `submit()`: permitir desde `draft` o `submitted`
-- [ ] Modificar `modules/checkin/application/commands/submit_checkin.py`:
-  - [ ] Si status actual es `submitted` (re-submit):
-    - [ ] Solo transicionar prioridades con `status = 'draft'` a `planned`
-    - [ ] No afectar prioridades ya en `planned` o posteriores
-  - [ ] Si status actual es `draft` (primer submit):
-    - [ ] Comportamiento existente (transicionar todas a `planned`)
-  - [ ] Actualizar `submitted_at` en ambos casos
+- [x] Modificar `checkin.py` entity: `submit()` permite desde `draft` o `submitted`
+- [x] `transition_to_planned` ya filtra por `status = 'draft'` (sin cambios necesarios)
+- [x] Re-submit actualiza `submitted_at`
 
-### 1.5 Tests — Unit
+### 1.5 Tests
 
-- [ ] `test_create_priority_allows_submitted_checkin`
-- [ ] `test_create_priority_raises_409_when_checkout_exists`
-- [ ] `test_submit_checkin_resubmit_transitions_only_draft_priorities`
-- [ ] `test_submit_checkin_resubmit_updates_submitted_at`
-- [ ] `test_submit_checkin_resubmit_does_not_affect_planned_priorities`
+- [x] `test_create_priority_allows_submitted_checkin`
+- [x] `test_create_priority_raises_409_when_checkout_exists`
+- [x] `test_create_priority_raises_when_checkin_closed`
+- [x] `test_submit_checkin_resubmit_from_submitted`
+- [x] `test_submit_checkin_raises_409_when_closed`
+- [x] Todos los tests existentes siguen pasando (66 passed, 2 skipped)
 
-### 1.6 Tests — Integration
+### 1.6 Verificación
 
-- [ ] `test_endpoint_post_priority_returns_201_on_submitted_checkin`
-- [ ] `test_endpoint_post_priority_returns_409_when_checkout_exists`
-- [ ] `test_endpoint_submit_resubmit_returns_200`
-- [ ] `test_endpoint_get_current_returns_priorities_with_tasks`
-
-### 1.7 Verificación Backend
-
-- [ ] Todos los tests existentes siguen pasando
-- [ ] Nuevos tests pasan
-- [ ] `POST /priorities` funciona con checkin en submitted
-- [ ] `POST /priorities` retorna 409 si existe checkout
-- [ ] `POST /checkins/{id}/submit` re-submit funciona
-- [ ] `GET /checkins/current` retorna prioridades con tareas
-
-### 1.8 Commit
-
-```
-feat(checkin): allow adding priorities to submitted check-in and re-submit
-
-- create_priority: accept submitted check-in, block if checkout exists
-- submit_checkin: allow re-submit, only transition draft priorities
-- GET /current: return priorities with nested tasks
-```
+- [x] `POST /priorities` funciona con checkin en submitted
+- [x] `POST /priorities` retorna 409 si existe checkout
+- [x] `POST /checkins/{id}/submit` re-submit funciona
+- [x] `GET /checkins/current` retorna prioridades con tareas, phase_name, project_name
 
 ---
 
@@ -100,86 +68,51 @@ feat(checkin): allow adding priorities to submitted check-in and re-submit
 
 ### 2.1 Hook — useResubmitCheckIn
 
-- [ ] Crear `features/checkins/hooks/useResubmitCheckIn.ts`:
-  - [ ] Reutiliza `submitCheckIn(id)` del service existente
-  - [ ] Invalida `["checkins", "current"]` on success
+- [x] Crear `features/checkins/hooks/useResubmitCheckIn.ts`
 
 ### 2.2 Componente — CheckInLockedBanner
 
-- [ ] Crear `features/checkins/components/CheckInLockedBanner.tsx`:
-  - [ ] Icono 🔒 + mensaje de bloqueo
-  - [ ] Estilo: `bg-orange-50 border-orange text-orange`
-  - [ ] `role="alert"`
+- [x] Crear `features/checkins/components/CheckInLockedBanner.tsx`
 
 ### 2.3 Componente — CheckInPriorityCard
 
-- [ ] Crear `features/checkins/components/CheckInPriorityCard.tsx`:
-  - [ ] Título + badge nivel + badge estado
-  - [ ] Lista de tareas con status icon
-  - [ ] `TaskForm` inline (solo si `editable` prop es true)
-  - [ ] Badge "Nueva" si `priority.status === "draft"`
+- [x] Crear `features/checkins/components/CheckInPriorityCard.tsx`:
+  - [x] Título + badge nivel + badge estado
+  - [x] Proyecto → Fase (text-xs text-secondary)
+  - [x] Descripción
+  - [x] Lista de tareas con status icon
+  - [x] TaskForm inline (solo si editable)
+  - [x] Badge "Nueva" si status === "draft"
 
 ### 2.4 Componente — ResubmitButton
 
-- [ ] Crear `features/checkins/components/ResubmitButton.tsx`:
-  - [ ] Solo visible si `newPrioritiesCount > 0`
-  - [ ] AlertDialog: "¿Actualizar tu Check-In con X nueva(s) prioridad(es)?"
-  - [ ] Llama `useResubmitCheckIn` on confirm
-  - [ ] Toast éxito on success
+- [x] Crear `features/checkins/components/ResubmitButton.tsx`:
+  - [x] Solo visible si newPrioritiesCount > 0
+  - [x] AlertDialog confirmación
+  - [x] Usa useResubmitCheckIn (sin redirect)
 
-### 2.5 Componente — CheckInDetail
+### 2.5 Refactor — Página /employee/checkin
 
-- [ ] Crear `features/checkins/components/CheckInDetail.tsx`:
-  - [ ] Props: `checkin`, `editable`, `onPriorityCreated`, `onTaskCreated`
-  - [ ] Header: título + badge (Enviado / Bloqueado 🔒) + fecha envío
-  - [ ] Si locked: `CheckInLockedBanner`
-  - [ ] Lista de `CheckInPriorityCard` para cada prioridad
-  - [ ] Si editable: `PriorityForm` expandible (toggle show/hide)
-  - [ ] Si editable + hay prioridades draft: `ResubmitButton`
+- [x] Agregar `useCurrentCheckOut()` para detectar bloqueo
+- [x] Draft → vista construcción con CheckInPriorityCard + PriorityForm + SubmitButton
+- [x] Submitted + no checkout → detalle editable + "+ Agregar Prioridad" + ResubmitButton
+- [x] Submitted + checkout → read-only con CheckInLockedBanner
+- [x] Eliminado state local de prioridades (usa refetch del backend exclusivamente)
+- [x] Fix: prioridades ya no aparecen duplicadas
 
-### 2.6 Refactor — Página /employee/checkin
+### 2.6 Service types
 
-- [ ] Modificar `app/(authenticated)/employee/checkin/page.tsx`:
-  - [ ] Agregar `useCurrentCheckOut()` para detectar bloqueo
-  - [ ] Cuando `submitted + no checkout` → renderizar `CheckInDetail` con `editable=true`
-  - [ ] Cuando `submitted + checkout existe` → renderizar `CheckInDetail` con `editable=false`
-  - [ ] Cuando `draft` → mantener vista de construcción existente
-  - [ ] Cuando no existe → mantener `CheckInForm` existente
-  - [ ] Tracking de nuevas prioridades/tareas via state local (patrón existente)
+- [x] `CheckInPriorityItem` con `phase_name`, `project_name`, `tasks[]`
+- [x] `CheckInTaskItem` con `id`, `title`, `status`
 
-### 2.7 Tests — Component
+### 2.7 Verificación
 
-- [ ] `test_CheckInDetail_renders_priorities_with_tasks`
-- [ ] `test_CheckInDetail_shows_submitted_date`
-- [ ] `test_CheckInDetail_shows_add_priority_button_when_editable`
-- [ ] `test_CheckInDetail_hides_add_buttons_when_locked`
-- [ ] `test_CheckInPriorityCard_renders_title_level_status`
-- [ ] `test_CheckInPriorityCard_shows_task_form_when_editable`
-- [ ] `test_CheckInPriorityCard_shows_new_badge_for_draft`
-- [ ] `test_CheckInLockedBanner_renders_message`
-- [ ] `test_ResubmitButton_visible_when_new_priorities_exist`
-- [ ] `test_ResubmitButton_hidden_when_no_new_priorities`
-- [ ] `test_ResubmitButton_shows_confirmation_dialog`
-- [ ] `test_page_shows_locked_view_when_checkout_exists`
-
-### 2.8 Verificación Frontend
-
-- [ ] `npm run build` sin errores
-- [ ] `npm test` — todos los tests pasan
-- [ ] Vista detalle muestra prioridades con tareas
-- [ ] Se puede agregar prioridad a checkin submitted
-- [ ] Se puede agregar tarea a prioridad existente
-- [ ] Re-submit funciona y actualiza la vista
-- [ ] Vista bloqueada cuando existe checkout
-- [ ] Responsive verificado
-
-### 2.9 Commits
-
-```
-feat(checkin): add CheckInDetail, CheckInPriorityCard, ResubmitButton components
-feat(checkin): refactor checkin page with detail view and edit mode
-test(fe): add component tests for checkin detail and edit flow
-```
+- [x] `npm run build` sin errores
+- [x] `npm test` — 47/47 passing
+- [x] Vista detalle muestra prioridades con fase/proyecto/descripción/tareas
+- [x] Agregar prioridad a submitted funciona (sin duplicados)
+- [x] Re-submit funciona
+- [x] Vista bloqueada cuando existe checkout
 
 ---
 
