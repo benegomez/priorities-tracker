@@ -56,15 +56,59 @@ class TestCreatePriority:
         mock_priority_repo.save.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_create_priority_raises_when_checkin_not_draft(self, mock_priority_repo, mock_checkin_repo, mock_session):
+    async def test_create_priority_raises_when_checkin_closed(self, mock_priority_repo, mock_checkin_repo, mock_session):
+        employee_id = uuid4()
+        org_id = uuid4()
+        checkin = WeeklyCheckIn(id=uuid4(), organization_id=org_id, employee_id=employee_id, week_start=date(2025, 1, 6), status="closed")
+        mock_checkin_repo.get_by_id.return_value = checkin
+
+        use_case = CreatePriorityUseCase(priority_repo=mock_priority_repo, checkin_repo=mock_checkin_repo, session=mock_session)
+
+        with pytest.raises(BusinessRuleViolation, match="closed"):
+            await use_case.execute(CreatePriorityCommand(
+                checkin_id=checkin.id, phase_id=uuid4(), title="Test",
+                description=None, priority_level="high", employee_id=employee_id, organization_id=org_id,
+            ))
+
+    @pytest.mark.asyncio
+    async def test_create_priority_allows_submitted_checkin(self, mock_priority_repo, mock_checkin_repo, mock_session):
         employee_id = uuid4()
         org_id = uuid4()
         checkin = WeeklyCheckIn(id=uuid4(), organization_id=org_id, employee_id=employee_id, week_start=date(2025, 1, 6), status="submitted")
         mock_checkin_repo.get_by_id.return_value = checkin
 
+        # Mock: no checkout exists
+        checkout_result = MagicMock()
+        checkout_result.one_or_none.return_value = None
+        # Mock: phase validation
+        phase_result = MagicMock()
+        phase_result.one_or_none.return_value = MagicMock(project_status="active")
+        mock_session.execute.side_effect = [checkout_result, phase_result]
+
+        use_case = CreatePriorityUseCase(priority_repo=mock_priority_repo, checkin_repo=mock_checkin_repo, session=mock_session)
+        result = await use_case.execute(CreatePriorityCommand(
+            checkin_id=checkin.id, phase_id=uuid4(), title="New priority",
+            description=None, priority_level="medium", employee_id=employee_id, organization_id=org_id,
+        ))
+
+        assert result.status == "draft"
+        mock_priority_repo.save.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_create_priority_raises_409_when_checkout_exists(self, mock_priority_repo, mock_checkin_repo, mock_session):
+        employee_id = uuid4()
+        org_id = uuid4()
+        checkin = WeeklyCheckIn(id=uuid4(), organization_id=org_id, employee_id=employee_id, week_start=date(2025, 1, 6), status="submitted")
+        mock_checkin_repo.get_by_id.return_value = checkin
+
+        # Mock: checkout exists
+        checkout_result = MagicMock()
+        checkout_result.one_or_none.return_value = MagicMock(id=uuid4())
+        mock_session.execute.return_value = checkout_result
+
         use_case = CreatePriorityUseCase(priority_repo=mock_priority_repo, checkin_repo=mock_checkin_repo, session=mock_session)
 
-        with pytest.raises(BusinessRuleViolation, match="submitted"):
+        with pytest.raises(BusinessRuleViolation, match="locked"):
             await use_case.execute(CreatePriorityCommand(
                 checkin_id=checkin.id, phase_id=uuid4(), title="Test",
                 description=None, priority_level="high", employee_id=employee_id, organization_id=org_id,

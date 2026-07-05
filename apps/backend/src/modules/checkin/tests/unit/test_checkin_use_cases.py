@@ -98,8 +98,8 @@ class TestSubmitCheckIn:
             ))
 
     @pytest.mark.asyncio
-    async def test_submit_checkin_raises_409_when_already_submitted(self, mock_checkin_repo, mock_priority_repo):
-        checkin = WeeklyCheckIn(id=uuid4(), organization_id=uuid4(), employee_id=uuid4(), week_start=date(2025, 1, 6), status="submitted")
+    async def test_submit_checkin_raises_409_when_closed(self, mock_checkin_repo, mock_priority_repo):
+        checkin = WeeklyCheckIn(id=uuid4(), organization_id=uuid4(), employee_id=uuid4(), week_start=date(2025, 1, 6), status="closed")
         mock_checkin_repo.get_by_id.return_value = checkin
         mock_priority_repo.count_by_checkin.return_value = 1
         use_case = SubmitCheckInUseCase(checkin_repo=mock_checkin_repo, priority_repo=mock_priority_repo)
@@ -108,6 +108,21 @@ class TestSubmitCheckIn:
             await use_case.execute(SubmitCheckInCommand(
                 checkin_id=checkin.id, employee_id=checkin.employee_id, organization_id=checkin.organization_id
             ))
+
+    @pytest.mark.asyncio
+    async def test_submit_checkin_resubmit_from_submitted(self, mock_checkin_repo, mock_priority_repo):
+        checkin = WeeklyCheckIn(id=uuid4(), organization_id=uuid4(), employee_id=uuid4(), week_start=date(2025, 1, 6), status="submitted")
+        mock_checkin_repo.get_by_id.return_value = checkin
+        mock_priority_repo.count_by_checkin.return_value = 3
+        use_case = SubmitCheckInUseCase(checkin_repo=mock_checkin_repo, priority_repo=mock_priority_repo)
+
+        result = await use_case.execute(SubmitCheckInCommand(
+            checkin_id=checkin.id, employee_id=checkin.employee_id, organization_id=checkin.organization_id
+        ))
+
+        assert result.status == "submitted"
+        assert result.submitted_at is not None
+        mock_priority_repo.transition_to_planned.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_submit_checkin_transitions_priorities_to_planned(self, mock_checkin_repo, mock_priority_repo):
