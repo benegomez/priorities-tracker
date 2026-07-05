@@ -1,5 +1,22 @@
 import { apiGet, apiPost } from "@/lib/api-client";
 
+export interface CheckInTaskItem {
+  id: string;
+  title: string;
+  status: string;
+}
+
+export interface CheckInPriorityItem {
+  id: string;
+  title: string;
+  description: string | null;
+  priority_level: string;
+  status: string;
+  phase_name: string | null;
+  project_name: string | null;
+  tasks: CheckInTaskItem[];
+}
+
 export interface CheckInResponse {
   id: string;
   employee_id: string;
@@ -8,6 +25,7 @@ export interface CheckInResponse {
   status: "draft" | "submitted" | "closed";
   submitted_at: string | null;
   priorities_count: number;
+  priorities: CheckInPriorityItem[];
   created_at: string;
   updated_at: string;
 }
