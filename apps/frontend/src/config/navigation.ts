@@ -1,5 +1,6 @@
 import {
   ClipboardCheck,
+  CheckSquare,
   LayoutDashboard,
   FolderOpen,
   TrendingUp,
@@ -26,6 +27,7 @@ const employeeNav: NavGroup[] = [
     title: "Mi Semana",
     items: [
       { label: "Check-In", href: "/employee/checkin", icon: ClipboardCheck },
+      { label: "Check-Out", href: "/employee/checkout", icon: CheckSquare },
       { label: "Dashboard", href: "/employee/dashboard", icon: LayoutDashboard },
     ],
   },

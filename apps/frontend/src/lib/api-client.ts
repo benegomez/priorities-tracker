@@ -47,3 +47,16 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   });
   return handleResponse<T>(response);
 }
+
+export async function apiPatch<T>(path: string, body?: unknown): Promise<T> {
+  const token = getAccessToken();
+  const response = await fetch(`${API_URL}${path}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+    ...(body !== undefined && { body: JSON.stringify(body) }),
+  });
+  return handleResponse<T>(response);
+}

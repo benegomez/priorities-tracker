@@ -3,7 +3,7 @@ id: 003-weekly-checkout
 persona: Colaborador Individual
 fr: FR-022, FR-023, FR-024
 bounded-context: Execution
-status: draft
+status: enriched
 created: 2025-01-06
 ---
 
@@ -102,7 +102,7 @@ Execution → Módulos: `checkout`, `priorities` (actualización de estado)
 ### Transiciones de Estado
 
 ```
-WeeklyCheckOut:  (nuevo) → Draft → Submitted
+WeeklyCheckOut:  (nuevo) → Draft → Submitted → Closed (futuro, no en esta US)
 
 Priority al submit del Check-Out:
   InProgress/Planned + marcada completada  → Completed
@@ -115,9 +115,40 @@ Task al submit del Check-Out:
 
 **Invariante:** No puede existir un Check-Out sin un Check-In `submitted` para la misma semana y empleado.
 
+**Nota sobre carry-over (BR-006):** En esta US, carry-over solo marca la prioridad con estado `carried_over`. La creación automática de un draft del siguiente Check-In con las prioridades arrastradas es una US separada (continuidad automática).
+
+**Nota sobre estado `Closed`:** La transición `Submitted → Closed` es futura (se usará cuando el manager revise o cuando el ciclo se archive). No se implementa en esta US.
+
+**Nota sobre columna `week_start`:** Se usa `week_start` (tipo DATE) como nombre de columna, consistente con la implementación de `check_ins` y `priorities`. No usar `week_period`.
+
 ---
 
 ### Contrato API Preliminar
+
+**GET /api/v1/checkouts/current**
+Obtiene el Check-Out de la semana actual del empleado autenticado.
+
+```
+Response 200:
+{
+  "id":         "uuid",
+  "checkin_id": "uuid",
+  "employee_id":     "uuid",
+  "organization_id": "uuid",
+  "week_start":  "2025-01-06",
+  "status":      "draft | submitted",
+  "submitted_at": null,
+  "notes":       "string | null",
+  "lessons_learned": "string | null",
+  "priorities":  [...],
+  "created_at": "..."
+}
+
+Response 404: No check-out for current week
+Errors: 401
+```
+
+---
 
 **POST /api/v1/checkouts**
 Crea un Check-Out en estado `draft` cargando las prioridades del Check-In activo.
@@ -236,10 +267,13 @@ Errors:
 **Escenario 1 — Colaborador crea un Check-Out exitosamente**
 ```gherkin
 Given un empleado con un Check-In en estado "submitted" para la semana actual
+  And el Check-In tiene prioridades con tareas asociadas
   And no tiene Check-Out creado para esa semana
 When envía POST /api/v1/checkouts con el checkin_id correspondiente
 Then el sistema retorna 201 con el Check-Out en estado "draft"
-  And el response incluye la lista de prioridades y tareas del Check-In
+  And el response incluye la lista de prioridades con sus tareas anidadas
+  And cada prioridad tiene un campo "completed" en false
+  And cada tarea tiene un campo "completed" en false
   And el Check-Out queda asociado al organization_id del token
 ```
 
@@ -303,7 +337,7 @@ Then el sistema retorna 403 Forbidden
 - **NFR-001 — Authentication:** Todo endpoint de Check-Out requiere Bearer JWT válido
 - **NFR-002 — Authorization:** Solo el empleado dueño del Check-In puede crear su Check-Out; validado desde el token
 - **NFR-004 — Response Time:** Creación y submit del Check-Out deben responder en < 800ms (incluye disparo de cálculo CRS)
-- **NFR-008 — Data Integrity:** Las transiciones de estado de prioridades y tareas deben ejecutarse en una única transacción atómica; si el cálculo del CRS falla, el submit del Check-Out no debe revertirse
+- **NFR-008 — Data Integrity:** Las transiciones de estado de prioridades y tareas deben ejecutarse en una única transacción atómica. El cálculo del CRS se ejecuta best-effort después del commit del submit — si falla, el Check-Out permanece en `submitted` y el CRS se puede recalcular posteriormente sin afectar el flujo del usuario
 - **NFR-009 — Auditability:** El evento `checkout.submitted` debe registrarse en el audit log con `user_id`, `organization_id`, `week_start`, `priorities_completed`, `priorities_carried` y `timestamp`
 - **NFR-010 — Simplicity:** El flujo completo de Check-Out debe ser completable en menos de 5 minutos
 
@@ -314,11 +348,22 @@ Then el sistema retorna 403 Forbidden
 - **Técnicas:**
   - US-002 (Auth) — JWT válido con `employee_id`, `organization_id` y `role`
   - US-001 (Check-In) — Tablas `check_ins`, `priorities`, `tasks` deben existir con datos
-  - Módulo `crs` — `SubmitCheckOutUseCase` dispara el cálculo del CRS mediante evento de dominio o llamada directa al servicio
+  - Módulo `crs` — El cálculo del CRS se invoca best-effort al submit. Si el módulo `crs` no está implementado aún, el submit funciona sin él y se registra un log indicando que el CRS queda pendiente de cálculo
   - Tabla `check_outs` debe existir (nueva migración Alembic)
+  - Tabla `crs_scores` — se crea en esta migración si no existe, para estar lista cuando se implemente el módulo CRS
 - **Funcionales:**
   - El empleado debe tener un Check-In en estado `submitted` para la semana actual antes de poder crear el Check-Out
-  - US-004 (CRS Calculation) se beneficia directamente de esta historia — el submit del Check-Out es su trigger
+  - El módulo CRS se beneficia directamente de esta historia — el submit del Check-Out es su trigger
+
+### Decisiones de Diseño
+
+| Decisión | Justificación |
+|---|---|
+| CRS best-effort (no bloquea submit) | El usuario no debe esperar ni fallar por un cálculo secundario |
+| Carry-over solo marca estado | La creación del siguiente check-in con prioridades arrastradas es otra US |
+| `week_start` (no `week_period`) | Consistencia con tablas existentes (`check_ins`, `priorities`) |
+| `Closed` state no implementado | Se usará en futuro cuando manager revise o ciclo se archive |
+| 5 endpoints (incluyendo GET /current) | El frontend necesita saber si ya existe checkout para la semana |
 
 ---
 
