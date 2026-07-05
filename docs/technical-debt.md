@@ -128,14 +128,13 @@
 | Campo | Valor |
 |---|---|
 | **ID** | TD-007 |
-| **Estado** | `open` |
+| **Estado** | `closed` |
 | **Prioridad** | P1 |
 | **Módulo** | `priorities` (frontend) |
 | **Origen** | US-001 `feature/001-weekly-checkin-creation` |
-| **Descripción** | La página `/employee/checkin` tiene un array `MOCK_PHASES` hardcodeado con un solo UUID de fase. El `PriorityForm` necesita consumir un endpoint real que liste proyectos y fases disponibles para el usuario. |
-| **Causa raíz** | El módulo `projects` no tiene endpoints de lectura implementados aún. Se usó un mock para no bloquear la entrega de US-001. |
-| **Criterio de cierre** | Implementar `GET /api/v1/projects` y `GET /api/v1/projects/{id}/phases` (o un endpoint combinado), crear hook `useAvailablePhases()`, y reemplazar `MOCK_PHASES` por datos reales. |
-| **Cuándo cerrar** | En la primera US que implemente el módulo `projects` o antes del primer deploy a staging. |
+| **Descripción** | ~~La página `/employee/checkin` tiene un array `MOCK_PHASES` hardcodeado.~~ Resuelto: PriorityForm ahora consume `GET /api/v1/projects/phases/available` via `useAvailablePhases()` hook. |
+| **Cerrado en** | 2026-07-05 — US-006 |
+| **PR** | feature/006-project-phase-management |
 
 ---
 
@@ -267,11 +266,75 @@
 
 ---
 
+### TD-016 — Component tests para módulo projects (frontend)
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-016 |
+| **Estado** | `open` |
+| **Prioridad** | P3 |
+| **Módulo** | `projects` (frontend) |
+| **Origen** | US-006 `feature/006-project-phase-management` |
+| **Descripción** | Los componentes de gestión de proyectos (ProjectList, ProjectDetail, UserSelect, PhaseList, MemberList) no tienen component tests dedicados. La funcionalidad se verificó manualmente y via build. |
+| **Causa raíz** | Se priorizó la entrega funcional sobre tests de componentes. |
+| **Criterio de cierre** | Crear `tests/projects.test.tsx` con al menos 10 tests: UserSelect renders, ProjectForm validates, MemberAddForm filters, etc. |
+| **Cuándo cerrar** | En la próxima iteración de calidad o al tocar el módulo projects. |
+
+---
+
+### TD-017 — Integration tests para projects endpoints
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-017 |
+| **Estado** | `open` |
+| **Prioridad** | P2 |
+| **Módulo** | `projects` (backend) |
+| **Origen** | US-006 `feature/006-project-phase-management` |
+| **Descripción** | El módulo projects tiene 13 unit tests (state machines) pero no tiene integration tests que validen los endpoints contra la base de datos real. Se verificó via curl pero no está automatizado. |
+| **Causa raíz** | Se priorizó la entrega funcional. |
+| **Criterio de cierre** | Crear `tests/integration/test_project_endpoints.py` con al menos 10 tests (GET list, POST create, GET detail, PATCH status, POST phase, PATCH phase, POST member, DELETE member, GET available, GET org-members, 403 for employee). |
+| **Cuándo cerrar** | En la próxima US que toque el módulo `projects`. |
+
+---
+
+### TD-018 — Duplicación de páginas admin/manager projects
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-018 |
+| **Estado** | `open` |
+| **Prioridad** | P3 |
+| **Módulo** | `projects` (frontend) |
+| **Origen** | US-006 `feature/006-project-phase-management` |
+| **Descripción** | Las páginas `/admin/projects` y `/manager/projects` (lista + detalle) son prácticamente idénticas — código duplicado. Deberían extraerse a componentes compartidos y las páginas solo ser wrappers con la ruta correcta. |
+| **Causa raíz** | Se creó rápido para que ambos roles tuvieran acceso. |
+| **Criterio de cierre** | Extraer `ProjectListView` y `ProjectDetailView` como componentes en `features/projects/components/`, y que las páginas de admin y manager solo importen y rendericen esos componentes. |
+| **Cuándo cerrar** | En la próxima iteración de refactoring o al agregar funcionalidad diferenciada por rol. |
+
+---
+
+### TD-019 — Sidebar flash en carga inicial (hydration delay)
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-019 |
+| **Estado** | `open` |
+| **Prioridad** | P3 |
+| **Módulo** | layout (frontend) |
+| **Origen** | US-006 (fix hydration) |
+| **Descripción** | El sidebar muestra brevemente el menú de `employee` antes de cambiar al menú correcto del rol. Esto ocurre porque el rol se lee de la cookie en `useEffect` (post-mount) para evitar hydration mismatch. |
+| **Causa raíz** | Server render no tiene acceso a cookies del browser. El `useEffect` lee la cookie después del mount, causando un re-render visible. |
+| **Criterio de cierre** | Usar middleware de Next.js para inyectar el rol como header o usar Server Components con `cookies()` de Next.js para leer el rol en el servidor. Alternativa: mostrar skeleton del sidebar hasta que el rol esté disponible. |
+| **Cuándo cerrar** | En la próxima iteración de UX polish. |
+
+---
+
 ## Deuda Cerrada
 
 | ID | Descripción | Cerrada en | PR |
 |---|---|---|---|
-| — | — | — | — |
+| TD-007 | PriorityForm usa fases hardcodeadas (mock) | 2026-07-05 | PR #6 (US-006) |
 
 ---
 
@@ -279,6 +342,7 @@
 
 | Fecha | Acción | US |
 |---|---|---|
+| 2026-07-05 | Registro: TD-016 a TD-019. Cierre: TD-007 | US-006 |
 | 2026-07-05 | Registro: TD-009 a TD-015 | US-003, US-004, US-005 |
 | 2025-06-23 | Registro: TD-005, TD-006, TD-007, TD-008 | US-001 |
 | 2026-06-23 | Registro inicial: TD-001, TD-002, TD-003, TD-004 | US-002 |

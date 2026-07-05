@@ -60,3 +60,17 @@ export async function apiPatch<T>(path: string, body?: unknown): Promise<T> {
   });
   return handleResponse<T>(response);
 }
+
+export async function apiDelete(path: string): Promise<void> {
+  const token = getAccessToken();
+  const response = await fetch(`${API_URL}${path}`, {
+    method: "DELETE",
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw { status: response.status, error_code: body.error_code ?? "UNKNOWN", message: body.message ?? body.detail ?? "Error" } as ApiError;
+  }
+}

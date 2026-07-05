@@ -13,11 +13,6 @@ import { PriorityForm } from "@/features/priorities/components/PriorityForm";
 import { Badge } from "@/components/ui/badge";
 import type { ApiError } from "@/lib/api-client";
 
-const MOCK_PHASES = [
-  { id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", name: "Descubrimiento", project_name: "Proyecto Alpha" },
-  { id: "cccccccc-cccc-cccc-cccc-cccccccccccc", name: "Desarrollo", project_name: "Proyecto Alpha" },
-  { id: "dddddddd-dddd-dddd-dddd-dddddddddddd", name: "Pruebas", project_name: "Proyecto Alpha" },
-];
 
 export default function CheckInPage() {
   const { data: checkin, isLoading, error } = useCurrentCheckIn();
@@ -80,7 +75,7 @@ export default function CheckInPage() {
           ))}
         </div>
 
-        <PriorityForm checkinId={checkin.id} phases={MOCK_PHASES} onPriorityCreated={handlePriorityCreated} />
+        <PriorityForm checkinId={checkin.id} onPriorityCreated={handlePriorityCreated} />
 
         <div className="flex justify-end pt-4 border-t border-border">
           <SubmitCheckInButton checkinId={checkin.id} prioritiesCount={totalPriorities} />
@@ -127,7 +122,7 @@ export default function CheckInPage() {
       {isEditable && (
         <div className="space-y-3">
           {showAddForm ? (
-            <PriorityForm checkinId={checkin.id} phases={MOCK_PHASES} onPriorityCreated={handlePriorityCreated} />
+            <PriorityForm checkinId={checkin.id} onPriorityCreated={handlePriorityCreated} />
           ) : (
             <button
               onClick={() => setShowAddForm(true)}
