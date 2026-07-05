@@ -47,6 +47,14 @@ const employeeNav: NavGroup[] = [
 
 const managerNav: NavGroup[] = [
   {
+    title: "Mi Semana",
+    items: [
+      { label: "Check-In", href: "/employee/checkin", icon: ClipboardCheck },
+      { label: "Check-Out", href: "/employee/checkout", icon: CheckSquare },
+      { label: "Mi CRS", href: "/employee/crs", icon: TrendingUp },
+    ],
+  },
+  {
     title: "Mi Equipo",
     items: [
       { label: "Vista de Equipo", href: "/manager/team", icon: Users },

@@ -27,9 +27,10 @@ describe("navigation config", () => {
 
   it("returns correct items for manager", () => {
     const nav = getNavigationForRole("manager");
-    expect(nav).toHaveLength(3);
-    expect(nav[0].title).toBe("Mi Equipo");
-    expect(nav[0].items[0].label).toBe("Vista de Equipo");
+    expect(nav).toHaveLength(4);
+    expect(nav[0].title).toBe("Mi Semana");
+    expect(nav[1].title).toBe("Mi Equipo");
+    expect(nav[1].items[0].label).toBe("Vista de Equipo");
   });
 
   it("returns correct items for administrator", () => {
