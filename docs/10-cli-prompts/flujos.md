@@ -37,3 +37,13 @@ User Story básica
 
 
 /create-user-story → /enrich-us → /create-tickets → /create-plan → /develop-plan → /run-tests → /git-flow → /update-docs
+
+
+Cuentas:
+
+Rol	Email	Password	Organización
+Administrator	admin@org-alpha.com	Admin1234!	Org Alpha
+Manager	manager@org-alpha.com	Manager1234!	Org Alpha
+Employee	employee@org-alpha.com	Employee1234!	Org Alpha
+Employee (inactive)	inactive@org-alpha.com	Inactive1234!	Org Alpha
+Employee	employee@org-beta.com	Employee1234!	Org Beta
