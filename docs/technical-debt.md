@@ -207,14 +207,13 @@
 | Campo | Valor |
 |---|---|
 | **ID** | TD-012 |
-| **Estado** | `open` |
+| **Estado** | `closed` |
 | **Prioridad** | P1 |
 | **Módulo** | `crs`, `checkout` |
 | **Origen** | US-003 `feature/003-weekly-checkout` |
-| **Descripción** | El submit del Check-Out tiene un `TODO: invoke CRS module when implemented`. La tabla `crs_scores` existe pero el cálculo real del CRS (fórmula v1.0 con 4 componentes) no está implementado. Solo se registra un log info. |
-| **Causa raíz** | El módulo `crs` es una US separada. Se dejó el placeholder best-effort para no bloquear el checkout. |
-| **Criterio de cierre** | Implementar `CRSCalculationService` con la fórmula v1.0 (40% prioridades + 30% tareas + 20% consistencia + 10% arrastre), persistir en `crs_scores`, e invocar desde `SubmitCheckOutUseCase`. |
-| **Cuándo cerrar** | En la US de CRS (próxima US crítica del roadmap). |
+| **Descripción** | ~~El submit del Check-Out tenía un `TODO: invoke CRS module`.~~ Resuelto: CRSCalculationService implementado con fórmula v1.0 (4 componentes), persistencia en `crs_scores`, y 17 unit tests. |
+| **Cerrado en** | 2026-07-05 — US-007 |
+| **PR** | feature/007-crs-calculation |
 
 ---
 
@@ -330,11 +329,44 @@
 
 ---
 
+### TD-020 — Component tests para CRS dashboard
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-020 |
+| **Estado** | `open` |
+| **Prioridad** | P2 |
+| **Módulo** | `crs` (frontend) |
+| **Origen** | US-007 `feature/007-crs-calculation` |
+| **Descripción** | Los componentes del dashboard CRS (CRSScoreCard, CRSTrendIndicator, CRSHistoryChart, CRSEmptyState) no tienen component tests dedicados. La funcionalidad se verificó manualmente. |
+| **Causa raíz** | Se priorizó la entrega funcional. |
+| **Criterio de cierre** | Crear `tests/crs-dashboard.test.tsx` con al menos 8 tests según lo definido en el ticket FE. |
+| **Cuándo cerrar** | En la próxima iteración de calidad. |
+
+---
+
+### TD-021 — Cascading checkbox logic es client-side only
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-021 |
+| **Estado** | `open` |
+| **Prioridad** | P2 |
+| **Módulo** | `checkout` (frontend + backend) |
+| **Origen** | US-007 (fix durante testing) |
+| **Descripción** | La lógica de cascading (marcar prioridad → marca tareas, todas tareas marcadas → marca prioridad) se ejecuta solo en el frontend. Si el usuario usa la API directamente, puede tener datos inconsistentes. Idealmente el backend también debería enforcar esta lógica en el submit. |
+| **Causa raíz** | Se implementó como fix de UX rápido en el frontend. |
+| **Criterio de cierre** | En `SubmitCheckOutUseCase`, antes de transicionar estados, verificar: si todas las tareas de una prioridad están marcadas como completed, marcar la prioridad también. Esto garantiza consistencia independientemente del cliente. |
+| **Cuándo cerrar** | En la próxima US que toque el módulo checkout. |
+
+---
+
 ## Deuda Cerrada
 
 | ID | Descripción | Cerrada en | PR |
 |---|---|---|---|
 | TD-007 | PriorityForm usa fases hardcodeadas (mock) | 2026-07-05 | PR #6 (US-006) |
+| TD-012 | CRS calculation no implementado (solo placeholder) | 2026-07-05 | PR #7 (US-007) |
 
 ---
 
@@ -342,6 +374,7 @@
 
 | Fecha | Acción | US |
 |---|---|---|
+| 2026-07-05 | Registro: TD-020, TD-021. Cierre: TD-012 | US-007 |
 | 2026-07-05 | Registro: TD-016 a TD-019. Cierre: TD-007 | US-006 |
 | 2026-07-05 | Registro: TD-009 a TD-015 | US-003, US-004, US-005 |
 | 2025-06-23 | Registro: TD-005, TD-006, TD-007, TD-008 | US-001 |

@@ -1,6 +1,6 @@
 ---
 story: 004-design-system-ui-shell
-status: pending
+status: done
 branch: feature/004-design-system-ui-shell
 risk_level: Medium
 complexity: L
