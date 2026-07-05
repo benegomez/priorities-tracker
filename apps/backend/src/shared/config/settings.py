@@ -10,6 +10,11 @@ class Settings:
         "DATABASE_URL",
         "postgresql+asyncpg://pt_user:changeme_local@postgres:5432/priorities_tracker",
     )
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
+
+    @property
+    def is_development(self) -> bool:
+        return self.ENVIRONMENT == "development"
 
 
 settings = Settings()
