@@ -361,6 +361,38 @@
 
 ---
 
+### TD-022 — Integration + security tests para teams endpoints
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-022 |
+| **Estado** | `open` |
+| **Prioridad** | P2 |
+| **Módulo** | `teams` (backend) |
+| **Origen** | US-008 `feature/008-manager-team-visibility` |
+| **Descripción** | Los 3 endpoints del módulo teams tienen 10 unit tests pero no tienen integration tests automatizados ni security tests dedicados. La seguridad (403 para employee, cross-manager, cross-org, 401 sin token) se verificó manualmente via curl pero no está automatizada. |
+| **Causa raíz** | Se priorizó la entrega funcional. La verificación manual cubre los escenarios pero no es repetible en CI. |
+| **Criterio de cierre** | Crear `tests/integration/test_team_endpoints.py` con al menos 8 tests y `tests/security/test_team_security.py` con al menos 4 tests (401, 403 employee, cross-manager, cross-org). |
+| **Cuándo cerrar** | Antes del primer deploy a staging o en la próxima US que toque `teams`. |
+
+---
+
+### TD-023 — Component tests para team dashboard (frontend)
+
+| Campo | Valor |
+|---|---|
+| **ID** | TD-023 |
+| **Estado** | `open` |
+| **Prioridad** | P3 |
+| **Módulo** | `teams` (frontend) |
+| **Origen** | US-008 `feature/008-manager-team-visibility` |
+| **Descripción** | Los componentes del team dashboard (TeamTable, TeamCRSBadge, TeamWeekStatusBadge, TeamEmptyState, MemberCRSHistory, MemberCheckInView) no tienen component tests dedicados. La funcionalidad se verificó via build y manualmente. |
+| **Causa raíz** | Se priorizó la entrega funcional. |
+| **Criterio de cierre** | Crear `tests/team-dashboard.test.tsx` con al menos 10 tests según lo definido en el ticket FE. |
+| **Cuándo cerrar** | En la próxima iteración de calidad. |
+
+---
+
 ## Deuda Cerrada
 
 | ID | Descripción | Cerrada en | PR |
@@ -374,6 +406,7 @@
 
 | Fecha | Acción | US |
 |---|---|---|
+| 2026-07-06 | Registro: TD-022, TD-023 | US-008 |
 | 2026-07-05 | Registro: TD-020, TD-021. Cierre: TD-012 | US-007 |
 | 2026-07-05 | Registro: TD-016 a TD-019. Cierre: TD-007 | US-006 |
 | 2026-07-05 | Registro: TD-009 a TD-015 | US-003, US-004, US-005 |

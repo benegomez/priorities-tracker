@@ -193,11 +193,12 @@ Manager Dashboard
 
 Layer	Artifact
 Product Feature	Team Dashboard
-User Story	View Team Status
-Use Case	Team Monitoring
-Domain Entity	Team, Priority, Risk, Blocker, CRS
-Database Tables	teams, priorities, risks, blockers, crs_history
-API Schemas	TeamDashboardResponse
+User Story	US-008 Manager Team Visibility
+Use Case	GetMyTeam, GetTeamMemberCRS, GetTeamMemberCheckIn
+Domain Entity	User (manager_id relationship), CRS, CheckIn
+Database Tables	users, crs_scores, check_ins, check_outs
+API Schemas	TeamOverviewResponse, TeamMemberCRSResponse, CheckInResponse
+Implementation	✅ Implemented (US-008)
 
 ⸻
 
@@ -311,4 +312,4 @@ Every MVP capability is represented throughout the architecture stack, ensuring 
 
 Project Status:
 
-IN PROGRESS — US-001 (Check-In), US-002 (Auth), US-003 (Check-Out), US-004 (Design System), US-005 (Check-In Detail), US-006 (Projects), US-007 (CRS) implemented.
+IN PROGRESS — US-001 (Check-In), US-002 (Auth), US-003 (Check-Out), US-004 (Design System), US-005 (Check-In Detail), US-006 (Projects), US-007 (CRS), US-008 (Manager Team) implemented.
