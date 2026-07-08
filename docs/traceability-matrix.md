@@ -181,11 +181,12 @@ Employee Dashboard
 
 Layer	Artifact
 Product Feature	Employee Dashboard
-User Story	View Personal Progress
-Use Case	Personal Monitoring
+User Story	US-009 Employee Personal Dashboard
+Use Case	GetCurrentCheckIn, GetCurrentCRS, GetCRSHistory (parallel)
 Domain Entity	Priority, Task, CRS
-Database Tables	priorities, tasks, crs_history
-API Schemas	DashboardResponse
+Database Tables	priorities, tasks, crs_scores
+API Schemas	CheckInResponse, CRSCurrentResponse, CRSHistoryResponse
+Implementation	✅ Implemented (PR #9)
 
 ⸻
 
@@ -312,4 +313,4 @@ Every MVP capability is represented throughout the architecture stack, ensuring 
 
 Project Status:
 
-IN PROGRESS — US-001 (Check-In), US-002 (Auth), US-003 (Check-Out), US-004 (Design System), US-005 (Check-In Detail), US-006 (Projects), US-007 (CRS), US-008 (Manager Team) implemented.
+IN PROGRESS — US-001 (Check-In), US-002 (Auth), US-003 (Check-Out), US-004 (Design System), US-005 (Check-In Detail), US-006 (Projects), US-007 (CRS), US-008 (Manager Team), US-009 (Employee Dashboard) implemented.

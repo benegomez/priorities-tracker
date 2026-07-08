@@ -1,5 +1,5 @@
 ---
-status: todo
+status: done
 type: frontend
 story: docs/user-stories/009-employee-dashboard/UserStory.md
 depends-on: null

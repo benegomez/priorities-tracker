@@ -406,6 +406,7 @@
 
 | Fecha | Acción | US |
 |---|---|---|
+| 2026-07-07 | Sin deuda nueva. US-009 100% frontend con tests completos | US-009 |
 | 2026-07-06 | Registro: TD-022, TD-023 | US-008 |
 | 2026-07-05 | Registro: TD-020, TD-021. Cierre: TD-012 | US-007 |
 | 2026-07-05 | Registro: TD-016 a TD-019. Cierre: TD-007 | US-006 |
