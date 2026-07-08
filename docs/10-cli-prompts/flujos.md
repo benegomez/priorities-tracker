@@ -47,3 +47,16 @@ Manager	manager@org-alpha.com	Manager1234!	Org Alpha
 Employee	employee@org-alpha.com	Employee1234!	Org Alpha
 Employee (inactive)	inactive@org-alpha.com	Inactive1234!	Org Alpha
 Employee	employee@org-beta.com	Employee1234!	Org Beta
+
+
+Opción B — Admin User Management (necesario para que la plataforma sea autosuficiente operativamente)
+
+Como administrador, quiero gestionar usuarios (crear, editar, activar/desactivar, asignar roles y equipos) desde el panel de administración.
+
+Opción C — Admin Team Management (complementa B, estructura organizacional completa)
+
+Como administrador, quiero gestionar equipos (crear, editar, asignar miembros y managers) desde el panel de administración.
+
+Opción D — Reporting (cierra el ciclo de visibilidad con reportes históricos)
+
+Como manager o empleado, quiero acceder a reportes de desempeño individual, de equipo y por proyecto.
