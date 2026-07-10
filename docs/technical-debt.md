@@ -406,6 +406,7 @@
 
 | Fecha | Acción | US |
 |---|---|---|
+| 2026-07-08 | Sin deuda nueva. US-011 con 9 BE + 8 FE tests. Cache semanal implementado | US-011 |
 | 2026-07-07 | Sin deuda nueva. US-010 conecta UI con hook existente | US-010 |
 | 2026-07-07 | Sin deuda nueva. US-009 100% frontend con tests completos | US-009 |
 | 2026-07-06 | Registro: TD-022, TD-023 | US-008 |

@@ -232,11 +232,12 @@ Artificial Intelligence
 
 Layer	Artifact
 Product Feature	AI Summary
-User Story	Review AI Insights
-Use Case	Manager Preparation
-Domain Entity	AI Summary
+User Story	US-011 AI Weekly Team Summary
+Use Case	GenerateTeamSummaryUseCase (on-demand, cached, fail-safe)
+Domain Entity	AI Summary (cached in ai_summaries table)
 Database Tables	ai_summaries
-API Schemas	AISummaryResponse
+API Schemas	TeamSummaryRequest, TeamSummaryResponse, DataSnapshot
+Implementation	✅ Implemented (US-011)
 
 ⸻
 
@@ -313,4 +314,4 @@ Every MVP capability is represented throughout the architecture stack, ensuring 
 
 Project Status:
 
-IN PROGRESS — US-001 (Check-In), US-002 (Auth), US-003 (Check-Out), US-004 (Design System), US-005 (Check-In Detail), US-006 (Projects), US-007 (CRS), US-008 (Manager Team), US-009 (Employee Dashboard), US-010 (Logout) implemented.
+IN PROGRESS — US-001 (Check-In), US-002 (Auth), US-003 (Check-Out), US-004 (Design System), US-005 (Check-In Detail), US-006 (Projects), US-007 (CRS), US-008 (Manager Team), US-009 (Employee Dashboard), US-010 (Logout), US-011 (AI Weekly Summary) implemented.

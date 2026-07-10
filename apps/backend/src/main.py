@@ -11,6 +11,7 @@ from src.modules.checkout.api.router import router as checkout_router
 from src.modules.projects.api.router import router as projects_router
 from src.modules.crs.api.router import router as crs_router
 from src.modules.teams.api.router import router as teams_router
+from src.modules.ai_insights.api.router import router as ai_router
 
 app = FastAPI(
     title="Priorities Tracker API",
@@ -39,6 +40,7 @@ app.include_router(checkout_router, prefix="/api/v1")
 app.include_router(projects_router, prefix="/api/v1")
 app.include_router(crs_router, prefix="/api/v1")
 app.include_router(teams_router, prefix="/api/v1")
+app.include_router(ai_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["health"])
