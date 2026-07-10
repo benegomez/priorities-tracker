@@ -7,6 +7,7 @@ import {
   Users,
   Building2,
   BarChart3,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import type { UserRole } from "@/store/auth-store";
@@ -59,6 +60,7 @@ const managerNav: NavGroup[] = [
     items: [
       { label: "Vista de Equipo", href: "/manager/team", icon: Users },
       { label: "Vista Semanal", href: "/manager/weekly", icon: LayoutDashboard },
+      { label: "Resumen IA", href: "/manager/ai-summary", icon: Sparkles },
     ],
   },
   {
