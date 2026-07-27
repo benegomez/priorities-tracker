@@ -60,3 +60,7 @@ Como administrador, quiero gestionar equipos (crear, editar, asignar miembros y 
 Opción D — Reporting (cierra el ciclo de visibilidad con reportes históricos)
 
 Como manager o empleado, quiero acceder a reportes de desempeño individual, de equipo y por proyecto.
+
+Reingresar chkins y outs
+docker compose exec api python scripts/seed_multi_week.py
+
