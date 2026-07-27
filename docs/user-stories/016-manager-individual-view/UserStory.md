@@ -3,9 +3,12 @@ id: 016-manager-individual-view
 persona: Manager
 fr: FR-028
 bounded-context: Commitment + Reliability
-status: enriched
+status: done
 created: 2025-01-28
 enriched: 2025-01-28
+completed: 2025-01-28
+pr: "#16"
+merge-commit: 142a8e5
 ---
 
 # US-016: Manager Individual View

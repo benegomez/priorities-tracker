@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 type: backend
 story: docs/user-stories/016-manager-individual-view/UserStory.md
 risk_level: Medium
