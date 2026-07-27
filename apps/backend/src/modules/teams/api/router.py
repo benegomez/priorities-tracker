@@ -1,3 +1,4 @@
+import math
 from datetime import date, timedelta
 from uuid import UUID
 
@@ -8,7 +9,14 @@ from src.modules.auth.api.dependencies import CurrentUser, require_roles
 from src.modules.checkin.api.schemas import CheckInPriorityItem, CheckInResponse, CheckInTaskItem
 from src.modules.crs.infrastructure.repositories.crs_repository_impl import CRSRepositoryImpl
 from src.modules.teams.api.schemas import (
+    AdminTeamDetailResponse,
+    AdminTeamListResponse,
+    AdminTeamMemberItem,
+    AdminTeamResponse,
     CRSHistoryItem,
+    TeamCreate,
+    TeamMemberActionResponse,
+    TeamMemberAdd,
     TeamMemberCRS,
     TeamMemberCRSCurrent,
     TeamMemberCRSResponse,
@@ -16,10 +24,25 @@ from src.modules.teams.api.schemas import (
     TeamMemberItem,
     TeamMemberWeekStatus,
     TeamOverviewResponse,
+    TeamUpdate,
 )
+from src.modules.teams.application.commands.create_update_team import (
+    CreateTeamCommand,
+    CreateTeamUseCase,
+    UpdateTeamCommand,
+    UpdateTeamUseCase,
+)
+from src.modules.teams.application.commands.manage_members import (
+    AddMemberCommand,
+    AddMemberUseCase,
+    RemoveMemberCommand,
+    RemoveMemberUseCase,
+)
+from src.modules.teams.infrastructure.repositories.team_admin_repo_impl import TeamAdminRepoImpl
 from src.modules.teams.infrastructure.repositories.team_repository_impl import TeamRepositoryImpl
 from src.shared.config.settings import settings
 from src.shared.database.session import get_db_session
+from src.shared.exceptions.base import BusinessRuleViolation
 
 router = APIRouter(prefix="/teams", tags=["teams"])
 
@@ -155,4 +178,200 @@ async def get_team_member_checkin(
         priorities=priorities,
         created_at=checkin.created_at,
         updated_at=checkin.updated_at,
+    )
+
+
+# ── Admin Team Management endpoints ─────────────────────────────────────────────
+
+
+def _admin_repo(session: AsyncSession) -> TeamAdminRepoImpl:
+    return TeamAdminRepoImpl(session)
+
+
+@router.get(
+    "",
+    response_model=AdminTeamListResponse,
+    summary="List teams in the organization",
+    operation_id="list_teams",
+    responses={403: {"description": "Insufficient permissions"}},
+)
+async def list_teams(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    current_user: CurrentUser = Depends(require_roles("administrator")),
+    session: AsyncSession = Depends(get_db_session),
+) -> AdminTeamListResponse:
+    repo = _admin_repo(session)
+    items, total = await repo.list_teams(current_user.organization_id, page, page_size)
+    return AdminTeamListResponse(
+        items=[_to_admin_response(t) for t in items],
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=math.ceil(total / page_size) if total else 0,
+    )
+
+
+@router.post(
+    "",
+    response_model=AdminTeamResponse,
+    status_code=201,
+    summary="Create a new team",
+    operation_id="create_team",
+    responses={
+        409: {"description": "Team name already exists"},
+        404: {"description": "Manager not found"},
+        403: {"description": "Insufficient permissions"},
+    },
+)
+async def create_team(
+    body: TeamCreate,
+    current_user: CurrentUser = Depends(require_roles("administrator")),
+    session: AsyncSession = Depends(get_db_session),
+) -> AdminTeamResponse:
+    use_case = CreateTeamUseCase(_admin_repo(session))
+    try:
+        team = await use_case.execute(CreateTeamCommand(
+            organization_id=current_user.organization_id,
+            name=body.name,
+            manager_id=body.manager_id,
+        ))
+        await session.commit()
+    except BusinessRuleViolation as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    return _to_admin_response(team)
+
+
+@router.get(
+    "/{team_id}",
+    response_model=AdminTeamDetailResponse,
+    summary="Get team detail with members",
+    operation_id="get_team",
+    responses={
+        404: {"description": "Team not found"},
+        403: {"description": "Insufficient permissions"},
+    },
+)
+async def get_team(
+    team_id: UUID,
+    current_user: CurrentUser = Depends(require_roles("administrator")),
+    session: AsyncSession = Depends(get_db_session),
+) -> AdminTeamDetailResponse:
+    repo = _admin_repo(session)
+    team = await repo.get_by_id(team_id, current_user.organization_id)
+    if not team:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
+    members = await repo.get_members(team_id, current_user.organization_id)
+    response = AdminTeamDetailResponse(**_to_admin_response(team).__dict__)
+    response.members = [
+        AdminTeamMemberItem(id=m.id, first_name=m.first_name, last_name=m.last_name, role=m.role, status=m.status)
+        for m in members
+    ]
+    return response
+
+
+@router.patch(
+    "/{team_id}",
+    response_model=AdminTeamResponse,
+    summary="Update team name or manager",
+    operation_id="update_team",
+    responses={
+        409: {"description": "Team name already exists"},
+        404: {"description": "Team not found"},
+        403: {"description": "Insufficient permissions"},
+    },
+)
+async def update_team(
+    team_id: UUID,
+    body: TeamUpdate,
+    current_user: CurrentUser = Depends(require_roles("administrator")),
+    session: AsyncSession = Depends(get_db_session),
+) -> AdminTeamResponse:
+    use_case = UpdateTeamUseCase(_admin_repo(session))
+    try:
+        team = await use_case.execute(UpdateTeamCommand(
+            team_id=team_id,
+            organization_id=current_user.organization_id,
+            name=body.name,
+            manager_id=body.manager_id,
+        ))
+        await session.commit()
+    except BusinessRuleViolation as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
+    return _to_admin_response(team)
+
+
+@router.post(
+    "/{team_id}/members",
+    response_model=TeamMemberActionResponse,
+    summary="Assign a user to a team",
+    operation_id="add_team_member",
+    responses={
+        409: {"description": "User is already a member of this team"},
+        404: {"description": "Team or user not found"},
+        403: {"description": "Insufficient permissions"},
+    },
+)
+async def add_team_member(
+    team_id: UUID,
+    body: TeamMemberAdd,
+    current_user: CurrentUser = Depends(require_roles("administrator")),
+    session: AsyncSession = Depends(get_db_session),
+) -> TeamMemberActionResponse:
+    use_case = AddMemberUseCase(_admin_repo(session))
+    try:
+        await use_case.execute(AddMemberCommand(
+            team_id=team_id,
+            user_id=body.user_id,
+            organization_id=current_user.organization_id,
+        ))
+        await session.commit()
+    except BusinessRuleViolation as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    return TeamMemberActionResponse(team_id=team_id, user_id=body.user_id)
+
+
+@router.delete(
+    "/{team_id}/members/{user_id}",
+    status_code=204,
+    summary="Remove a user from a team",
+    operation_id="remove_team_member",
+    responses={
+        404: {"description": "User is not a member of this team"},
+        403: {"description": "Insufficient permissions"},
+    },
+)
+async def remove_team_member(
+    team_id: UUID,
+    user_id: UUID,
+    current_user: CurrentUser = Depends(require_roles("administrator")),
+    session: AsyncSession = Depends(get_db_session),
+) -> None:
+    use_case = RemoveMemberUseCase(_admin_repo(session))
+    try:
+        await use_case.execute(RemoveMemberCommand(
+            team_id=team_id,
+            user_id=user_id,
+            organization_id=current_user.organization_id,
+        ))
+        await session.commit()
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+def _to_admin_response(team) -> AdminTeamResponse:
+    return AdminTeamResponse(
+        id=team.id,
+        name=team.name,
+        manager_id=team.manager_id,
+        manager_name=team.manager_name,
+        member_count=team.member_count,
+        created_at=team.created_at,
+        updated_at=team.updated_at,
     )
