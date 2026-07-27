@@ -1,5 +1,7 @@
 # PR #12 — US-012: Admin User Management
 
+**Branch:** `feature/012-admin-user-management` → `main`
+
 ## Summary
 
 Implements full user lifecycle management for the Administrator role. Admins can create users (with auto-generated temporary password), edit user data including password reset, assign roles and managers, and activate/deactivate users — all from the admin panel without requiring direct database access.
