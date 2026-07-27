@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 type: frontend
 story: docs/user-stories/015-manager-weekly-view/UserStory.md
 depends-on: tickets/backend/ticket.md

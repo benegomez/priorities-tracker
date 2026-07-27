@@ -3,9 +3,12 @@ id: 015-manager-weekly-view
 persona: Manager
 fr: FR-027
 bounded-context: Commitment + Reliability
-status: enriched
+status: done
 created: 2025-01-28
 enriched: 2025-01-28
+completed: 2025-01-28
+pr: "#15"
+merge-commit: 83bbf0f
 ---
 
 # US-015: Manager Weekly View
