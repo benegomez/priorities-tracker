@@ -17,6 +17,7 @@ class UserUpdate(BaseModel):
     last_name: str | None = None
     role: str | None = None
     manager_id: UUID | None = None
+    new_password: str | None = None
 
 
 class UserStatusUpdate(BaseModel):

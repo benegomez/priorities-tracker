@@ -33,6 +33,7 @@ export function UserFormModal({
   const [lastName, setLastName] = useState(user?.last_name ?? "");
   const [role, setRole] = useState<string>(user?.role ?? "employee");
   const [managerId, setManagerId] = useState(user?.manager_id ?? "");
+  const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -57,6 +58,7 @@ export function UserFormModal({
         last_name: lastName || undefined,
         role: role || undefined,
         ...(managerId && { manager_id: managerId }),
+        ...(newPassword && { new_password: newPassword }),
       };
       onSubmit(data);
     }
@@ -141,6 +143,22 @@ export function UserFormModal({
               ))}
             </select>
           </div>
+
+          {mode === "edit" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nueva contraseña <span className="text-gray-400">(dejar vacío para no cambiar)</span>
+              </label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Mínimo 12 caracteres"
+                autoComplete="new-password"
+              />
+            </div>
+          )}
 
           {error && (
             <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>

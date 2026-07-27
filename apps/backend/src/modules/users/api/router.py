@@ -151,6 +151,7 @@ async def update_user(
             last_name=body.last_name,
             role=body.role,
             manager_id=body.manager_id,
+            new_password=body.new_password,
         ))
         await session.commit()
     except BusinessRuleViolation as e:

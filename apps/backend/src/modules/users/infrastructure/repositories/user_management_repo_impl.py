@@ -121,15 +121,17 @@ class UserManagementRepoImpl(UserManagementRepository):
         last_name: str | None,
         role: str | None,
         manager_id: UUID | None,
+        hashed_password: str | None = None,
     ) -> UserDetail | None:
         await self._session.execute(
             text("""
                 UPDATE users SET
-                    first_name = COALESCE(:first_name, first_name),
-                    last_name  = COALESCE(:last_name, last_name),
-                    role       = COALESCE(:role, role),
-                    manager_id = COALESCE(CAST(:manager_id AS uuid), manager_id),
-                    updated_at = now()
+                    first_name      = COALESCE(:first_name, first_name),
+                    last_name       = COALESCE(:last_name, last_name),
+                    role            = COALESCE(:role, role),
+                    manager_id      = COALESCE(CAST(:manager_id AS uuid), manager_id),
+                    hashed_password = COALESCE(:hashed_password, hashed_password),
+                    updated_at      = now()
                 WHERE id = :id AND organization_id = :org_id AND deleted_at IS NULL
             """),
             {
@@ -139,6 +141,7 @@ class UserManagementRepoImpl(UserManagementRepository):
                 "last_name": last_name,
                 "role": role,
                 "manager_id": manager_id,
+                "hashed_password": hashed_password,
             },
         )
         await self._session.flush()

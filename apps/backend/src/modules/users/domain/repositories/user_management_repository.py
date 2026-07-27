@@ -45,6 +45,7 @@ class UserManagementRepository(ABC):
         last_name: str | None,
         role: str | None,
         manager_id: UUID | None,
+        hashed_password: str | None = None,
     ) -> UserDetail | None: ...
 
     @abstractmethod

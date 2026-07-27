@@ -38,6 +38,7 @@ export interface UserUpdate {
   last_name?: string;
   role?: string;
   manager_id?: string;
+  new_password?: string;
 }
 
 export const userService = {
