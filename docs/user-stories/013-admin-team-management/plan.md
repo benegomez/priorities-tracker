@@ -31,12 +31,12 @@ created: 2025-01-28
 
 ## Fase 3 — Frontend
 
-- [ ] Agregar tipos y funciones admin en `features/teams/services/team-service.ts`
-- [ ] Crear `features/teams/hooks/useAdminTeams.ts` (6 hooks)
-- [ ] Crear `features/teams/components/AdminTeamTable.tsx`
-- [ ] Crear `features/teams/components/TeamFormModal.tsx`
-- [ ] Crear `features/teams/components/TeamMembersModal.tsx`
-- [ ] Crear `app/(authenticated)/admin/teams/page.tsx`
-- [ ] Agregar entrada en `config/navigation.ts`
-- [ ] Tests — `tests/team-management.test.tsx` (7 tests)
-- [ ] Verificar build `npx next build --no-lint`
+- [x] Agregar tipos y funciones admin en `features/teams/services/team-service.ts`
+- [x] Crear `features/teams/hooks/useAdminTeams.ts` (6 hooks)
+- [x] Crear `features/teams/components/AdminTeamTable.tsx`
+- [x] Crear `features/teams/components/TeamFormModal.tsx`
+- [x] Crear `features/teams/components/TeamMembersModal.tsx`
+- [x] Crear `app/(authenticated)/admin/teams/page.tsx`
+- [x] Agregar entrada en `config/navigation.ts` (ya existía)
+- [x] Tests — `tests/team-management.test.tsx` (8 tests)
+- [x] Verificar build `npx next build --no-lint`
