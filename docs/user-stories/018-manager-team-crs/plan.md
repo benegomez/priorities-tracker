@@ -1,6 +1,9 @@
 ---
 story: docs/user-stories/018-manager-team-crs/UserStory.md
-status: pending
+status: done
+completed: 2025-01-28
+pr: "#18"
+merge_commit: dab3b3b
 ---
 
 # Plan — US-018 Manager Team CRS View

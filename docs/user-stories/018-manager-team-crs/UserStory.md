@@ -3,9 +3,12 @@ id: 018-manager-team-crs
 persona: Manager
 fr: FR-025, FR-026
 bounded-context: Reliability
-status: enriched
+status: done
 created: 2025-01-28
 enriched: 2025-01-28
+completed: 2025-01-28
+pr: "#18"
+merge_commit: dab3b3b
 ---
 
 # US-018: Manager Team CRS View

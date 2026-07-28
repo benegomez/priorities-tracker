@@ -1,6 +1,9 @@
 ---
-status: pending
+status: done
 type: frontend
+completed: 2025-01-28
+pr: "#18"
+merge_commit: dab3b3b
 story: docs/user-stories/018-manager-team-crs/UserStory.md
 risk_level: Low
 complexity: S
