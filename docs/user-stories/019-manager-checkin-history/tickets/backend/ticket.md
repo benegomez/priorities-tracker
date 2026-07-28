@@ -2,7 +2,7 @@
 id: BE-019
 us: 019-manager-checkin-history
 layer: backend
-status: pending
+status: done
 risk: medium
 ---
 

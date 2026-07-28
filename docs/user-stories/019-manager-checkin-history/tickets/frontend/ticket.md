@@ -2,7 +2,7 @@
 id: FE-019
 us: 019-manager-checkin-history
 layer: frontend
-status: pending
+status: done
 risk: medium
 ---
 

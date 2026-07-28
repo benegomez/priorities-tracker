@@ -1,6 +1,6 @@
 ---
 us: 019-manager-checkin-history
-status: pending
+status: done
 ---
 
 # Plan de Implementación — US-019

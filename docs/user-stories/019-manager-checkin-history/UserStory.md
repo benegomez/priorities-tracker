@@ -3,9 +3,12 @@ id: 019-manager-checkin-history
 persona: Manager
 fr: FR-028
 bounded-context: Commitment + Reliability
-status: pending
+status: done
 created: 2025-07-28
 enriched: 2025-07-28
+completed: 2025-07-28
+pr: "#19"
+merge-commit: 1c7b0cd
 ---
 
 # US-019: Manager — Historial de Check-Ins por Semana
