@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useTeamMemberCRS } from "@/features/teams/hooks/useTeamMemberCRS";
@@ -15,15 +16,29 @@ export default function TeamMemberDetailPage() {
   const params = useParams();
   const employeeId = params.employeeId as string;
 
-  const { data: crsData, isLoading: crsLoading } = useTeamMemberCRS(employeeId);
-  const { data: checkinData, isLoading: checkinLoading, error: checkinError } = useTeamMemberCheckIn(employeeId);
+  const [selectedWeek, setSelectedWeek] = useState<string | undefined>();
 
-  const employeeName = crsData ? `${crsData.employee.first_name} ${crsData.employee.last_name}` : "Cargando...";
+  const { data: crsData, isLoading: crsLoading } = useTeamMemberCRS(employeeId);
+  const { data: checkinData, isLoading: checkinLoading, error: checkinError } =
+    useTeamMemberCheckIn(employeeId, selectedWeek);
+
+  // Initialize selectedWeek with the most recent week from CRS history
+  useEffect(() => {
+    if (!selectedWeek && crsData?.history?.length) {
+      setSelectedWeek(crsData.history[0].week_start);
+    }
+  }, [crsData, selectedWeek]);
+
+  const employeeName = crsData
+    ? `${crsData.employee.first_name} ${crsData.employee.last_name}`
+    : "Cargando...";
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/manager/team" className="text-sm text-primary hover:underline">← Volver al equipo</Link>
+        <Link href="/manager/team" className="text-sm text-primary hover:underline">
+          ← Volver al equipo
+        </Link>
       </div>
 
       <h1 className="text-2xl font-semibold text-gray-900">{employeeName}</h1>
@@ -41,7 +56,11 @@ export default function TeamMemberDetailPage() {
                 <CRSTrendIndicator trend={crsData.current.trend} />
                 <span className="text-sm text-secondary">Semana: {crsData.current.week_start}</span>
               </div>
-              <MemberCRSHistory history={crsData.history} />
+              <MemberCRSHistory
+                history={crsData.history}
+                selectedWeek={selectedWeek}
+                onSelectWeek={setSelectedWeek}
+              />
             </div>
           ) : (
             <p className="text-sm text-secondary">Aún no tiene CRS calculado.</p>
@@ -51,12 +70,16 @@ export default function TeamMemberDetailPage() {
 
       {/* Check-In Section */}
       <Card>
-        <CardHeader><CardTitle>Check-In de la Semana</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>
+            Check-In{selectedWeek ? ` — ${selectedWeek}` : " de la Semana"}
+          </CardTitle>
+        </CardHeader>
         <CardContent>
           {checkinLoading ? (
-            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" aria-label="Cargando check-in" />
           ) : checkinError ? (
-            <p className="text-sm text-secondary">No ha creado check-in esta semana.</p>
+            <p className="text-sm text-secondary">No hay check-in registrado para esta semana.</p>
           ) : checkinData ? (
             <MemberCheckInView
               priorities={checkinData.priorities}

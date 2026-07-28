@@ -40,7 +40,6 @@ from src.modules.teams.application.commands.manage_members import (
 )
 from src.modules.teams.infrastructure.repositories.team_admin_repo_impl import TeamAdminRepoImpl
 from src.modules.teams.infrastructure.repositories.team_repository_impl import TeamRepositoryImpl
-from src.shared.config.settings import settings
 from src.shared.database.session import get_db_session
 from src.shared.exceptions.base import BusinessRuleViolation
 
@@ -49,8 +48,6 @@ router = APIRouter(prefix="/teams", tags=["teams"])
 
 def _get_current_week_start() -> date:
     today = date.today()
-    if settings.is_development:
-        return today
     return today - timedelta(days=today.weekday())
 
 
@@ -136,25 +133,26 @@ async def get_team_member_crs(
 @router.get(
     "/my-team/{employee_id}/checkin",
     response_model=CheckInResponse,
-    summary="Get current week check-in of a direct report (read-only)",
+    summary="Get check-in of a direct report for a given week (defaults to current week)",
     operation_id="get_team_member_checkin",
     responses={
         403: {"description": "Employee is not a direct report"},
-        404: {"description": "No check-in for current week"},
+        404: {"description": "No check-in found for the requested week"},
     },
 )
 async def get_team_member_checkin(
     employee_id: UUID,
+    week_start: date | None = Query(None, description="ISO date of the week start (defaults to current week)"),
     current_user: CurrentUser = Depends(require_roles("manager", "administrator")),
     session: AsyncSession = Depends(get_db_session),
 ) -> CheckInResponse:
     repo = TeamRepositoryImpl(session)
     await repo.validate_direct_report(employee_id, current_user.user_id, current_user.organization_id)
 
-    week_start = _get_current_week_start()
-    checkin = await repo.get_checkin_for_employee(employee_id, current_user.organization_id, week_start)
+    resolved_week = week_start or _get_current_week_start()
+    checkin = await repo.get_checkin_for_employee(employee_id, current_user.organization_id, resolved_week)
     if not checkin:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No check-in for current week")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No check-in found for the requested week")
 
     priorities_data = await repo.load_priorities_with_tasks(checkin.id, current_user.organization_id)
     priorities = [

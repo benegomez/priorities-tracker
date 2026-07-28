@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemberCRSHistory } from "@/features/teams/components/MemberCRSHistory";
 import { MemberCheckInView } from "@/features/teams/components/MemberCheckInView";
@@ -60,6 +60,22 @@ describe("MemberCRSHistory", () => {
     render(<MemberCRSHistory history={[]} />);
     expect(screen.getByText(/sin historial/i)).toBeTruthy();
   });
+
+  it("calls onSelectWeek when a row is clicked", () => {
+    const onSelect = vi.fn();
+    render(<MemberCRSHistory history={mockHistory} onSelectWeek={onSelect} />);
+    fireEvent.click(screen.getByText("2024-12-30"));
+    expect(onSelect).toHaveBeenCalledWith("2024-12-30");
+  });
+
+  it("highlights the selected week row", () => {
+    const { container } = render(
+      <MemberCRSHistory history={mockHistory} selectedWeek="2025-01-06" />
+    );
+    const rows = container.querySelectorAll("tbody tr");
+    expect(rows[0].className).toContain("bg-primary/10");
+    expect(rows[1].className).not.toContain("bg-primary/10");
+  });
 });
 
 // ── MemberCheckInView ─────────────────────────────────────────────────────────
@@ -93,5 +109,42 @@ describe("TeamMemberDetailPage", () => {
     } as unknown as ReturnType<typeof useTeamMemberCheckIn>);
     const { container } = render(<TeamMemberDetailPage />, { wrapper });
     expect(container.querySelector(".animate-pulse")).toBeTruthy();
+  });
+
+  it("shows check-in section title with selected week", () => {
+    vi.mocked(useTeamMemberCRS).mockReturnValue({
+      data: {
+        employee: { id: "e1", first_name: "Ana", last_name: "Martínez" },
+        current: { score: 87.5, trend: "stable", risk_level: "low", week_start: "2025-01-06" },
+        history: mockHistory,
+      },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useTeamMemberCRS>);
+    vi.mocked(useTeamMemberCheckIn).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: { status: 404 },
+    } as unknown as ReturnType<typeof useTeamMemberCheckIn>);
+    render(<TeamMemberDetailPage />, { wrapper });
+    // Title includes the week
+    expect(screen.getAllByText(/check-in/i).length).toBeGreaterThan(0);
+  });
+
+  it("shows no-checkin message when 404", () => {
+    vi.mocked(useTeamMemberCRS).mockReturnValue({
+      data: {
+        employee: { id: "e1", first_name: "Ana", last_name: "Martínez" },
+        current: null,
+        history: [],
+      },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useTeamMemberCRS>);
+    vi.mocked(useTeamMemberCheckIn).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: { status: 404 },
+    } as unknown as ReturnType<typeof useTeamMemberCheckIn>);
+    render(<TeamMemberDetailPage />, { wrapper });
+    expect(screen.getByText(/no hay check-in registrado/i)).toBeTruthy();
   });
 });

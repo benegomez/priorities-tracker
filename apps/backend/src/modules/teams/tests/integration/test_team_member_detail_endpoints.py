@@ -149,3 +149,55 @@ class TestGetMemberCRS:
         data = r.json()
         assert data["current"] is None
         assert data["history"] == []
+
+
+@pytest.mark.asyncio
+class TestGetMemberCheckinByWeek:
+    async def test_get_checkin_with_week_start_returns_correct_week(self):
+        """GET /my-team/{id}/checkin?week_start=YYYY-MM-DD returns check-in for that week."""
+        employee_id = await _get_direct_report_id()
+        if not employee_id:
+            pytest.skip("Manager has no direct reports in seed data")
+        # Fetch CRS history to get a known week_start with data
+        async with httpx.AsyncClient(base_url=BASE_URL, timeout=10) as c:
+            crs_r = await c.get(
+                f"{BASE}/my-team/{employee_id}/crs?weeks=8",
+                headers=await _manager_headers(),
+            )
+        history = crs_r.json().get("history", [])
+        if not history:
+            pytest.skip("No CRS history available to derive a week_start")
+        week_start = history[0]["week_start"]
+
+        async with httpx.AsyncClient(base_url=BASE_URL, timeout=10) as c:
+            r = await c.get(
+                f"{BASE}/my-team/{employee_id}/checkin?week_start={week_start}",
+                headers=await _manager_headers(),
+            )
+        assert r.status_code in (200, 404)  # 200 if check-in exists, 404 if not
+        if r.status_code == 200:
+            data = r.json()
+            assert data["week_start"] == week_start
+            assert "priorities" in data
+
+    async def test_get_checkin_nonexistent_week_returns_404(self):
+        """GET /my-team/{id}/checkin?week_start for a week with no check-in returns 404."""
+        employee_id = await _get_direct_report_id()
+        if not employee_id:
+            pytest.skip("Manager has no direct reports in seed data")
+        async with httpx.AsyncClient(base_url=BASE_URL, timeout=10) as c:
+            r = await c.get(
+                f"{BASE}/my-team/{employee_id}/checkin?week_start=2020-01-06",
+                headers=await _manager_headers(),
+            )
+        assert r.status_code == 404
+
+    async def test_get_checkin_with_week_start_non_direct_report_returns_403(self):
+        """week_start param does not bypass the direct-report validation."""
+        random_id = str(uuid4())
+        async with httpx.AsyncClient(base_url=BASE_URL, timeout=10) as c:
+            r = await c.get(
+                f"{BASE}/my-team/{random_id}/checkin?week_start=2025-06-30",
+                headers=await _manager_headers(),
+            )
+        assert r.status_code == 403

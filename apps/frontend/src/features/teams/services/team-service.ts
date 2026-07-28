@@ -136,6 +136,9 @@ export function getTeamMemberCRS(employeeId: string, weeks = 8): Promise<TeamMem
   return apiGet<TeamMemberCRSResponse>(`/api/v1/teams/my-team/${employeeId}/crs?weeks=${weeks}`);
 }
 
-export function getTeamMemberCheckIn(employeeId: string): Promise<TeamMemberCheckInResponse> {
-  return apiGet<TeamMemberCheckInResponse>(`/api/v1/teams/my-team/${employeeId}/checkin`);
+export function getTeamMemberCheckIn(employeeId: string, weekStart?: string): Promise<TeamMemberCheckInResponse> {
+  const url = weekStart
+    ? `/api/v1/teams/my-team/${employeeId}/checkin?week_start=${weekStart}`
+    : `/api/v1/teams/my-team/${employeeId}/checkin`;
+  return apiGet<TeamMemberCheckInResponse>(url);
 }
