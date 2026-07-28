@@ -1,7 +1,10 @@
 ---
 id: US-006
 title: Project & Phase Management
-status: draft
+status: done
+completed: 2025-01-28
+pr: "#6"
+merge_commit: 847ca5a
 priority: high
 risk_level: Medium
 complexity: L

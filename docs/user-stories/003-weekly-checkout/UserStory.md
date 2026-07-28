@@ -3,7 +3,10 @@ id: 003-weekly-checkout
 persona: Colaborador Individual
 fr: FR-022, FR-023, FR-024
 bounded-context: Execution
-status: enriched
+status: done
+completed: 2025-01-28
+pr: "#4"
+merge_commit: adfb8bf
 created: 2025-01-06
 ---
 

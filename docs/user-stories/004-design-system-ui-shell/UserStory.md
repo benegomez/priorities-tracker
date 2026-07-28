@@ -1,7 +1,10 @@
 ---
 id: US-004
 title: Design System & UI Shell
-status: enriched
+status: done
+completed: 2025-01-28
+pr: "#3"
+merge_commit: ca4b274
 priority: high
 risk_level: Medium
 complexity: L

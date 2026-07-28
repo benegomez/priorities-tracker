@@ -1,7 +1,10 @@
 ---
 id: US-007
 title: CRS Calculation & Dashboard
-status: enriched
+status: done
+completed: 2025-01-28
+pr: "#7"
+merge_commit: 83352af
 priority: critical
 risk_level: Critical
 complexity: L

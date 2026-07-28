@@ -1,7 +1,10 @@
 ---
 id: US-010
 title: Logout — Cerrar Sesión
-status: enriched
+status: done
+completed: 2025-01-28
+pr: "#10"
+merge_commit: bd515d2
 priority: high
 risk_level: Low
 complexity: S

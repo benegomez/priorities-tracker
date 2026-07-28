@@ -1,7 +1,10 @@
 ---
 id: US-011
 title: AI Weekly Team Summary
-status: enriched
+status: done
+completed: 2025-01-28
+pr: "#11"
+merge_commit: a22285d
 priority: high
 risk_level: Medium
 complexity: L

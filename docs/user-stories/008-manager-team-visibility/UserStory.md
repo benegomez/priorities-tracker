@@ -1,7 +1,10 @@
 ---
 id: US-008
 title: Manager Team Visibility — CRS & Check-Ins
-status: enriched
+status: done
+completed: 2025-01-28
+pr: "#8"
+merge_commit: 7aa9ce3
 priority: high
 risk_level: High
 complexity: L

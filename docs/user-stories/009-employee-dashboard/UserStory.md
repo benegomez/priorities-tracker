@@ -1,7 +1,10 @@
 ---
 id: US-009
 title: Employee Personal Dashboard
-status: enriched
+status: done
+completed: 2025-01-28
+pr: "#9"
+merge_commit: 041aa62
 priority: high
 risk_level: Medium
 complexity: M

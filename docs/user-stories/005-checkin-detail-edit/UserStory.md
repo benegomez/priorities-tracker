@@ -1,7 +1,10 @@
 ---
 id: US-005
 title: Check-In Detail View & Edit
-status: draft
+status: done
+completed: 2025-01-28
+pr: "#5"
+merge_commit: 1a9a998
 priority: high
 risk_level: High
 complexity: M

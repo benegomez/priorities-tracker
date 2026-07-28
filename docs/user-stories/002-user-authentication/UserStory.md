@@ -3,7 +3,10 @@ id: 002-user-authentication
 persona: Colaborador Individual
 fr: NFR-001, NFR-002
 bounded-context: Organization
-status: enriched
+status: done
+completed: 2025-01-28
+pr: "#1"
+merge_commit: d04cef3
 created: 2025-01-06
 ---
 

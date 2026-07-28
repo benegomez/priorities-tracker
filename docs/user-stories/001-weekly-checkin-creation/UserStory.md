@@ -3,7 +3,10 @@ id: 001-weekly-checkin-creation
 persona: Colaborador Individual
 fr: FR-014, FR-015, FR-016
 bounded-context: Commitment
-status: enriched
+status: done
+completed: 2025-01-28
+pr: "#2"
+merge_commit: 5344ec2
 created: 2025-01-06
 enriched: 2025-01-06
 ---
