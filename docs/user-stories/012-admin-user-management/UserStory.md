@@ -3,9 +3,12 @@ id: 012-admin-user-management
 persona: Administrador
 fr: FR-001, FR-002, FR-003, FR-004, FR-005, FR-006
 bounded-context: Organization
-status: enriched
+status: done
 created: 2025-01-27
 enriched: 2025-01-27
+completed: 2025-01-28
+pr: "#12"
+merge_commit: 6c527c6
 ---
 
 # US-012: Admin User Management

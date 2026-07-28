@@ -1,10 +1,13 @@
 ---
 story: 012-admin-user-management
-status: pending
+status: done
 branch: feature/012-admin-user-management
 risk_level: High
 complexity: M
 created: 2025-01-27
+completed: 2025-01-28
+pr: "#12"
+merge_commit: 6c527c6
 ---
 
 # Plan de Implementación — US-012: Admin User Management

@@ -3,7 +3,10 @@ id: 014-admin-project-management
 persona: Administrador
 fr: FR-010, FR-011, FR-012, FR-013
 bounded-context: Commitment
-status: enriched
+status: done
+completed: 2025-01-28
+pr: "#14"
+merge_commit: a61c22e
 created: 2025-01-28
 enriched: 2025-01-28
 ---

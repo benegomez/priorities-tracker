@@ -3,9 +3,12 @@ id: 013-admin-team-management
 persona: Administrador
 fr: FR-007, FR-008, FR-009
 bounded-context: Organization
-status: enriched
+status: done
 created: 2025-01-28
 enriched: 2025-01-28
+completed: 2025-01-28
+pr: "#13"
+merge_commit: 5136c89
 ---
 
 # US-013: Admin Team Management

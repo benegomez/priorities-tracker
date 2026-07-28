@@ -1,7 +1,10 @@
 ---
 id: 013-admin-team-management
-status: in-progress
+status: done
 created: 2025-01-28
+completed: 2025-01-28
+pr: "#13"
+merge_commit: 5136c89
 ---
 
 # Plan US-013 — Admin Team Management
