@@ -1,6 +1,9 @@
 ---
-status: pending
+status: done
 type: backend
+completed: 2025-01-28
+pr: "#17"
+merge_commit: 23dd6bc
 story: docs/user-stories/017-reporting/UserStory.md
 risk_level: Medium
 complexity: L

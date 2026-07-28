@@ -3,9 +3,12 @@ id: 017-reporting
 persona: Manager + Employee
 fr: FR-029, FR-030, FR-031
 bounded-context: Reliability
-status: enriched
+status: done
 created: 2025-01-28
 enriched: 2025-01-28
+completed: 2025-01-28
+pr: "#17"
+merge_commit: 23dd6bc
 ---
 
 # US-017: Reporting

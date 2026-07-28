@@ -1,6 +1,9 @@
 ---
 story: docs/user-stories/017-reporting/UserStory.md
-status: pending
+status: done
+completed: 2025-01-28
+pr: "#17"
+merge_commit: 23dd6bc
 ---
 
 # Plan — US-017 Reporting
