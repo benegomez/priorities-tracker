@@ -35,6 +35,9 @@ Priorities Tracker ayuda a los managers a conocer en qué está trabajando su eq
 https://github.com/benegomez/priorities-tracker.git
 
 
+URL demo: http://sdnet-demo.ddns.net:8010/
+
+
 Usuarios para probar la applicacion:
 Rol	Email	Password	
 Manager	manager@org-alpha.com	Manager1234!
