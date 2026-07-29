@@ -351,7 +351,69 @@ Todo lo demás puede evolucionar en una V2. Esto mantiene el producto enfocado, 
 > Proporciona imágenes y/o videotutorial mostrando la experiencia del usuario desde que aterriza en la aplicación, pasando por todas las funcionalidades principales.
 
 ### **1.4. Instrucciones de instalación:**
-> Documenta de manera precisa las instrucciones para instalar y poner en marcha el proyecto en local (librerías, backend, frontend, servidor, base de datos, migraciones y semillas de datos, etc.)
+
+#### Requisitos previos
+- Docker y Docker Compose instalados
+- Git
+
+#### 1. Clonar el repositorio
+```bash
+git clone https://github.com/benegomez/priorities-tracker.git
+cd priorities-tracker
+```
+
+#### 2. Configurar variables de entorno
+```bash
+cp .env.example .env
+# Editar .env con los valores reales:
+# - JWT_SECRET y JWT_REFRESH_SECRET: generar con `openssl rand -hex 32`
+# - NEXT_PUBLIC_API_URL=http://localhost:8089  (desarrollo local)
+```
+
+#### 3. Levantar los servicios
+```bash
+docker compose up --build -d
+```
+
+Servicios disponibles:
+| Servicio | URL |
+|---|---|
+| Frontend | http://localhost:8901 |
+| API | http://localhost:8089 |
+| API Docs | http://localhost:8089/docs |
+| Health check | http://localhost:8089/health |
+
+#### 4. Ejecutar migraciones
+```bash
+docker compose exec api alembic upgrade head
+```
+
+#### 5. Cargar datos iniciales (seed de autenticación)
+```bash
+docker compose exec api python scripts/seed_auth.py
+```
+
+Cuentas creadas:
+| Email | Password | Rol |
+|---|---|---|
+| admin@org-alpha.com | Admin1234! | administrator |
+| manager@org-alpha.com | Manager1234! | manager |
+| employee@org-alpha.com | Employee1234! | employee |
+
+#### 6. Cargar datos de demo (opcional)
+```bash
+docker compose exec api python scripts/seed_demo.py
+```
+
+Crea 5 empleados con perfiles CRS distintos, 3 proyectos y 8 semanas de historial.
+
+#### Deploy en servidor remoto (puerto único)
+
+Si el servidor solo expone un puerto (ej. 8010), configurar en `.env`:
+```bash
+NEXT_PUBLIC_API_URL=   # dejar vacío
+```
+Next.js proxiará automáticamente `/api/v1/*` al contenedor `api` por la red Docker interna.
 
 ---
 
@@ -1411,7 +1473,56 @@ docs/09-governance/governance-charter-v1.0-FINAL.md
 
 ### **2.6. Tests**
 
-> Describe brevemente algunos de los tests realizados
+La estrategia de testing sigue el principio Risk-Based Testing (ADR-005): cobertura proporcional al riesgo del flujo.
+
+#### Niveles de cobertura
+
+| Nivel | Módulos | Cobertura objetivo |
+|---|---|---|
+| Crítico | auth, checkin, checkout, CRS | >95% |
+| Core | priorities, teams, projects | >80% |
+| Soporte | reporting, ai_insights | >60% |
+
+#### Tests Backend (pytest)
+
+**Módulo auth** — 12 integration tests
+- Login exitoso, credenciales inválidas, token expirado, refresh token, logout, RBAC por rol
+
+**Módulo checkin** — 24 integration tests
+- Crear check-in, submit, duplicado por semana, prioridades y tareas, RBAC
+
+**Módulo checkout** — 7 unit tests
+- Cierre de ciclo, carry-over de prioridades, cálculo CRS al submit
+
+**Módulo CRS** — 17 unit tests
+- Fórmula v1.0 (4 componentes), edge cases (0 prioridades, 100% completadas), tendencias
+
+**Módulo teams** — 13 integration tests
+- Vista de equipo, CRS por empleado, check-in por semana con `week_start` param, RBAC
+
+**Módulo projects** — 13 unit tests
+- State machines de proyecto y fase, transiciones válidas e inválidas
+
+#### Tests Frontend (vitest + @testing-library/react)
+
+**125 tests en 15 archivos** — todos pasando ✅
+
+Ejemplos representativos:
+- `checkin-flow.test.tsx` — CheckInForm, submit, estados loading/error
+- `manager-individual.test.tsx` — MemberCRSHistory interactivo, selección de semana, check-in por semana
+- `manager-team-crs.test.tsx` — tabla CRS ordenada por riesgo, empty state
+- `reporting.test.tsx` — ReportStatCard, ReportWeeklyBreakdown, páginas de reportes
+- `crs-dashboard.test.tsx` — CRSScoreCard, CRSTrendIndicator, historial
+
+#### Ejecutar tests
+
+```bash
+# Backend
+docker compose exec api python -m pytest --cov=src -v
+
+# Frontend
+cd apps/frontend && npx vitest run
+```
 
 ---
 
@@ -2142,40 +2253,65 @@ Referencias
 
 > Documenta 3 de las historias de usuario principales utilizadas durante el desarrollo, teniendo en cuenta las buenas prácticas de producto al respecto.
 
-**Historia de Usuario 1**
-docs/user-stories/001-weekly-checkin-creation/UserStory.md
+El proyecto cuenta con **19 historias de usuario** completadas (US-001 a US-019), todas en `docs/user-stories/`.
 
+**Historia de Usuario 1 — Check-In Semanal**
+`docs/user-stories/001-weekly-checkin-creation/UserStory.md`
 
-**Historia de Usuario 2**
+Flujo principal del producto. El empleado registra sus compromisos semanales: selecciona proyecto/fase, define prioridades con nivel de importancia, agrega tareas y envía el check-in. Incluye validación de duplicado por semana (BR-001) y carry-over de prioridades pendientes.
 
-docs/user-stories/002-user-authentication/UserStory.md
+**Historia de Usuario 2 — Autenticación**
+`docs/user-stories/002-user-authentication/UserStory.md`
 
-**Historia de Usuario 3**
+Autenticación JWT con access token (15 min) y refresh token (7 días). RBAC con 3 roles: administrator, manager, employee. Redirección automática por rol al login. Rate limiting en endpoints de auth.
 
-docs/user-stories/003-weekly-checkout/UserStory.md
+**Historia de Usuario 3 — Check-Out Semanal**
+`docs/user-stories/003-weekly-checkout/UserStory.md`
+
+Cierre del ciclo semanal. El empleado marca prioridades y tareas completadas, registra notas y envía el check-out. Al submit se calcula automáticamente el CRS v1.0 (BR-009). Las prioridades no completadas pueden arrastrarse al siguiente ciclo.
 
 ---
 
 ## 6. Tickets de Trabajo
 
-> Documenta 3 de los tickets de trabajo principales del desarrollo, uno de backend, uno de frontend, y uno de bases de datos. Da todo el detalle requerido para desarrollar la tarea de inicio a fin teniendo en cuenta las buenas prácticas al respecto. 
+> Documenta 3 de los tickets de trabajo principales del desarrollo, uno de backend, uno de frontend, y uno de bases de datos. Da todo el detalle requerido para desarrollar la tarea de inicio a fin teniendo en cuenta las buenas prácticas al respecto.
 
-**Ticket 1**
-docs/user-stories/001-weekly-checkin-creation/tickets/backend/ticket.md
+**Ticket 1 — Backend: Implementar endpoint de Check-In**
+`docs/user-stories/001-weekly-checkin-creation/tickets/backend/ticket.md`
 
-**Ticket 2**
-docs/user-stories/001-weekly-checkin-creation/tickets/database/ticket.md
+Implementa `POST /api/v1/checkins` con validación de duplicado semanal (BR-001), `GET /api/v1/checkins/current` para el check-in activo, y `POST /api/v1/checkins/{id}/submit` para enviar. Incluye casos de uso `CreateCheckInUseCase` y `SubmitCheckInUseCase`, repositorio SQLAlchemy async, y 12 integration tests con testcontainers.
 
-**Ticket 3**
-docs/user-stories/001-weekly-checkin-creation/tickets/frontend/ticket.md
+**Ticket 2 — Base de Datos: Schema de Check-In y Prioridades**
+`docs/user-stories/001-weekly-checkin-creation/tickets/database/ticket.md`
+
+Migración Alembic que crea las tablas `check_ins`, `priorities` y `tasks` con columnas de auditoría (`created_at`, `updated_at`, `deleted_at`, `deleted_by`), índices en FK y `week_start`, constraint unique `(employee_id, week_start, organization_id)` para BR-001, y soft delete en todas las entidades.
+
+**Ticket 3 — Frontend: Flujo de Check-In**
+`docs/user-stories/001-weekly-checkin-creation/tickets/frontend/ticket.md`
+
+Implementa la página `/employee/checkin` con `CheckInForm` (Zod + react-hook-form), `PriorityCard` con gestión de tareas inline, `SubmitCheckInButton` con confirmación, y `CheckInLockedBanner` para check-ins ya enviados. Usa TanStack Query para fetch/mutación y Zustand para estado local del formulario.
 ---
 
 ## 7. Pull Requests
 
 > Documenta 3 de las Pull Requests realizadas durante la ejecución del proyecto
 
-**Pull Request 1**
+El proyecto cuenta con **19 PRs** mergeados a `main`. A continuación los 3 más representativos:
 
-**Pull Request 2**
+**Pull Request 1 — US-001: Weekly Check-In Creation**
+- Branch: `feature/001-weekly-checkin-creation`
+- Merge commit: ver `docs/user-stories/001-weekly-checkin-creation/UserStory.md`
+- Cambios: schema DB (tablas `check_ins`, `priorities`, `tasks`), 3 endpoints backend con casos de uso y repositorios, flujo frontend completo con formulario, 24 integration tests BE + tests FE
+- Riesgo: Critical — cobertura >95%
 
-**Pull Request 3**
+**Pull Request 2 — US-007: CRS Calculation**
+- Branch: `feature/007-crs-calculation`
+- Merge commit: ver `docs/user-stories/007-crs-calculation/UserStory.md`
+- Cambios: `CRSCalculationService` con fórmula v1.0 (40% prioridades + 30% tareas + 20% consistencia + 10% carry), integración automática al submit del check-out, tabla `crs_scores`, dashboard frontend con score/tendencia/historial, 17 unit tests BE + 8 FE
+- Riesgo: Critical — cierra TD-012
+
+**Pull Request 3 — US-019: Manager Checkin History**
+- Branch: `feature/019-manager-checkin-history`
+- Merge commit: `1c7b0cd`
+- Cambios: `week_start` query param opcional en `GET /teams/my-team/{id}/checkin`, tabla `MemberCRSHistory` interactiva con selección de semana y highlight, estado `selectedWeek` en página de detalle del empleado, 3 integration tests BE + 9 FE
+- Riesgo: Medium — backward-compatible, sin migración DB
