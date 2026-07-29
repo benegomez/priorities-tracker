@@ -51,7 +51,7 @@ export function getCurrentCheckOut(): Promise<CheckOutResponse> {
 }
 
 export function createCheckOut(checkinId: string): Promise<CheckOutResponse> {
-  return apiPost<CheckOutResponse>("/api/v1/checkouts/", { checkin_id: checkinId });
+  return apiPost<CheckOutResponse>("/api/v1/checkouts", { checkin_id: checkinId });
 }
 
 export function markPriorityCompleted(checkoutId: string, priorityId: string, completed: boolean) {

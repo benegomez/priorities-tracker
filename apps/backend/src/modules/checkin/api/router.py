@@ -101,7 +101,7 @@ async def get_current_checkin(
 
 
 @router.post(
-    "/",
+    "",
     response_model=CheckInResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a weekly check-in",

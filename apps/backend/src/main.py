@@ -20,6 +20,7 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    redirect_slashes=False,
 )
 
 # Rate limiting
@@ -28,7 +29,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8901"],
+    allow_origins=["http://localhost:8901", "http://localhost:8010"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
