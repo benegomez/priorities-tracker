@@ -348,7 +348,149 @@ Todo lo demás puede evolucionar en una V2. Esto mantiene el producto enfocado, 
 
 ### **1.3. Diseño y experiencia de usuario:**
 
-> Proporciona imágenes y/o videotutorial mostrando la experiencia del usuario desde que aterriza en la aplicación, pasando por todas las funcionalidades principales.
+A continuación se documentan los flujos principales de la plataforma con capturas de pantalla ilustrativas.
+
+---
+
+#### Flujo 1 — Check-In Semanal (Colaborador)
+
+El colaborador registra sus compromisos para la semana en menos de 5 minutos. Es el flujo principal del producto y el punto de entrada de toda la cadena de valor.
+
+**Paso 1 — Acceso al Check-In**
+El colaborador accede a `/employee/checkin`. Si ya existe un check-in para la semana, lo ve en modo lectura. Si no, puede crear uno nuevo.
+
+![Check-In - Vista principal](docs/screenshots/checkin-01-main.png)
+<!-- Captura: página /employee/checkin mostrando el estado actual de la semana -->
+
+**Paso 2 — Agregar prioridades**
+Selecciona proyecto y fase, escribe el título de la prioridad, asigna nivel (Alta / Media / Baja) y opcionalmente agrega tareas.
+
+![Check-In - Formulario de prioridad](docs/screenshots/checkin-02-priority-form.png)
+<!-- Captura: formulario de nueva prioridad con selector de proyecto/fase y campo de nivel -->
+
+**Paso 3 — Lista de prioridades del check-in**
+Las prioridades agregadas se muestran como tarjetas con sus tareas anidadas. Se pueden editar o eliminar antes de enviar.
+
+![Check-In - Lista de prioridades](docs/screenshots/checkin-03-priorities-list.png)
+<!-- Captura: lista de PriorityCard con tareas expandidas -->
+
+**Paso 4 — Enviar el Check-In**
+Al hacer clic en "Enviar Check-In", el estado cambia a `submitted` y el manager puede verlo inmediatamente en su dashboard.
+
+![Check-In - Confirmación de envío](docs/screenshots/checkin-04-submitted.png)
+<!-- Captura: banner de confirmación o estado "Enviado" con fecha -->
+
+![Check-In - Visualizacon Check In ](docs/screenshots/checkin-04-checkinview.png)
+<!-- Captura: banner de confirmación o estado "Enviado" con fecha -->
+---
+
+#### Flujo 2 — Check-Out Semanal (Colaborador)
+
+Al cierre de la semana, el colaborador registra qué completó y qué continúa. Este flujo dispara automáticamente el cálculo del CRS.
+
+**Paso 1 — Iniciar Check-Out**
+El colaborador accede a `/employee/checkout`. El sistema carga las prioridades y tareas del check-in de la semana.
+
+![Check-Out - Vista inicial](docs/screenshots/checkout-01-main.png)
+<!-- Captura: página /employee/checkout con prioridades cargadas del check-in -->
+
+**Paso 2 — Marcar prioridades y tareas completadas**
+Cada prioridad tiene un checkbox. Al marcarla, sus tareas se marcan automáticamente. Las prioridades no marcadas quedarán como `carried_over`.
+
+![Check-Out - Marcado de prioridades](docs/screenshots/checkout-02-marking.png)
+<!-- Captura: CheckOutPriorityCard con checkboxes de prioridad y tareas -->
+
+**Paso 3 — Notas y aprendizajes**
+Opcionalmente el colaborador registra comentarios de la semana y lecciones aprendidas.
+
+![Check-Out - Notas](docs/screenshots/checkout-03-notes.png)
+<!-- Captura: sección de notas y lessons_learned del formulario -->
+
+**Paso 4 — Enviar Check-Out y ver resumen**
+Al enviar, el sistema muestra el resumen de la semana: prioridades completadas, arrastradas y el CRS calculado automáticamente.
+
+![Check-Out - Resumen final](docs/screenshots/checkout-04-summary.png)
+<!-- Captura: CheckOutSummary con contadores y CRS de la semana -->
+
+---
+
+#### Flujo 3 — Reportes (Manager y Colaborador)
+
+La sección de reportes muestra tendencias históricas de cumplimiento. El manager ve su equipo; el colaborador ve su propio historial.
+
+**Reporte Individual (Colaborador)**
+Accesible en `/employee/crs`. Muestra tasa de cumplimiento, CRS actual y desglose semanal de las últimas 8 semanas.
+
+![Reportes - Individual](docs/screenshots/reports-01-individual.png)
+<!-- Captura: página /employee/reports con ReportStatCard y ReportWeeklyBreakdown -->
+
+**Reporte de Equipo (Manager)**
+Accesible en `manager/team`. Muestra cumplimiento promedio del equipo, CRS promedio y tabla de miembros con su tendencia.
+
+![Reportes - Equipo](docs/screenshots/reports-02-team.png)
+
+**Reporte de Vista Semanal (Manager)**
+Accesible en `/manager/weekly`. Muestra Resumen de la semana actual
+![Reportes - Weekly](docs/screenshots/reports-03-semanal.png)
+
+
+**Resumen Semanacl con IA**
+Accesible en `/manager/ai-summary`. Muestra Analisis generado por IA, en caso de no tener el analisis Actual aparece un boton para generarlo.
+![Reportes - AI Summary](docs/screenshots/reports-04-ia.png)
+
+Al pedir crear el reporte de IA se muestra de la siguiente forma
+![Reportes - AI Summary Generated](docs/screenshots/reports-05-ia-report.png)
+
+
+
+---
+
+#### Flujo 4 — Administración de Proyectos (Administrador)
+
+El administrador gestiona los proyectos y fases que los colaboradores usan para clasificar sus prioridades semanales.
+
+**Lista de Proyectos**
+Accesible en `/admin/projects`. Muestra todos los proyectos de la organización con estado, número de fases y participantes.
+
+![Admin Proyectos - Lista](docs/screenshots/admin-projects-01-list.png)
+<!-- Captura: página /admin/projects con tabla de proyectos y estados -->
+
+**Crear Proyecto**
+Formulario modal para crear un nuevo proyecto con nombre, descripción y responsable.
+
+![Admin Proyectos - Crear](docs/screenshots/admin-projects-02-create.png)
+<!-- Captura: modal de creación de proyecto con campos nombre, descripción y selector de owner -->
+
+**Detalle de Proyecto — Fases y Participantes**
+Accesible en `/admin/projects/[id]`. El administrador gestiona las fases del proyecto (crear, cambiar estado) y los participantes asignados.
+
+![Admin Proyectos - Detalle](docs/screenshots/admin-projects-03-detail.png)
+<!-- Captura: página de detalle con lista de fases y tabla de participantes -->
+
+
+---
+
+#### Flujo 5 — Vista de Equipo del Manager
+
+El manager obtiene visibilidad del estado semanal de su equipo sin necesidad de reuniones de status.
+
+**Vista General del Equipo**
+Accesible en `/manager/team`. Muestra cada colaborador con su CRS actual, tendencia y estado del check-in/check-out de la semana.
+
+![Manager - Vista de equipo](docs/screenshots/manager-team-01-overview.png)
+<!-- Captura: página /manager/team con tabla de miembros, CRS badges y status badges -->
+
+**Perfil Individual del Colaborador**
+Al hacer clic en un colaborador, el manager accede a `/manager/team/[id]` con el historial CRS y el check-in de cualquier semana seleccionable.
+
+![Manager - Perfil individual](docs/screenshots/manager-team-02-individual.png)
+<!-- Captura: página /manager/team/[id] con CRS score, tabla de historial interactiva y check-in de la semana seleccionada -->
+
+**Historial Interactivo por Semana**
+Cada fila del historial CRS es clickeable. Al seleccionar una semana, la sección inferior muestra el check-in de esa semana con sus prioridades y tareas.
+
+![Manager - Historial semanal](docs/screenshots/manager-team-03-history.png)
+<!-- Captura: tabla MemberCRSHistory con fila seleccionada resaltada y MemberCheckInView con prioridades de esa semana -->
 
 ### **1.4. Instrucciones de instalación:**
 

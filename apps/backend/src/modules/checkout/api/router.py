@@ -94,7 +94,7 @@ async def get_current_checkout(
 
 
 @router.post(
-    "/",
+    "",
     response_model=CheckOutResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a weekly check-out",

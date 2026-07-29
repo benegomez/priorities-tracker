@@ -17,7 +17,7 @@ router = APIRouter(prefix="/priorities", tags=["priorities"])
 
 
 @router.post(
-    "/",
+    "",
     response_model=PriorityResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a priority",
