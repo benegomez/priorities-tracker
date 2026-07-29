@@ -406,6 +406,9 @@
 
 | Fecha | Acción | US |
 |---|---|---|
+| 2026-07-28 | Sin deuda nueva. Deploy single-port via Next.js rewrites | infra |
+| 2026-07-28 | Sin deuda nueva. US-019 extiende endpoint existente + tabla interactiva | US-019 |
+| 2026-07-28 | Fix: `_get_current_week_start()` devolvía `today` en dev en lugar del lunes | hotfix |
 | 2026-07-08 | Sin deuda nueva. US-011 con 9 BE + 8 FE tests. Cache semanal implementado | US-011 |
 | 2026-07-07 | Sin deuda nueva. US-010 conecta UI con hook existente | US-010 |
 | 2026-07-07 | Sin deuda nueva. US-009 100% frontend con tests completos | US-009 |
