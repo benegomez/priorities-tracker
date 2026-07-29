@@ -34,7 +34,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: priorities-tracker-frontend
     ports:
-      - "8901:3000"
+      - "8010:3000"
     volumes:
       - ./apps/frontend:/app
       - /app/node_modules
