@@ -34,6 +34,12 @@ Priorities Tracker ayuda a los managers a conocer en qué está trabajando su eq
 
 https://github.com/benegomez/priorities-tracker.git
 
+
+Usuarios para probar la applicacion:
+Rol	Email	Password	
+Manager	manager@org-alpha.com	Manager1234!
+Employee	employee@org-alpha.com	Employee1234!
+
 ---
 
 ## 1. Descripción general del producto
